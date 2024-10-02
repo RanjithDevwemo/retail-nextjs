@@ -263,7 +263,6 @@ import axios from 'axios';
 import UploadArea from '@/app/Assets/upload_area.svg'
 import Image from 'next/image';
 
-
 export default function App() {
   
   const [image, setImage] = useState(null);
