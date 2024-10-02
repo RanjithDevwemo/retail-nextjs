@@ -369,7 +369,7 @@ export default function App() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 p-6">
       <div className="w-full max-w-lg bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold mb-4 text-center">Add Product</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center">Add Product : {process.env.VAL} Val is </h2>
         <form onSubmit={addProduct} className="space-y-4">
           {Object.entries(productDetails).map(([key, value]) => (
             key !== 'godown' && key !== 'image' && (

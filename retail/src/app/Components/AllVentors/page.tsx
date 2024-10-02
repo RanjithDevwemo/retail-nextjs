@@ -2,7 +2,7 @@
 export default function page() {
   return (
     <div>
-      All Ventors
+      <p>All Ventors .env values is {process.env.VAL}</p>
     </div>
   )
 }
