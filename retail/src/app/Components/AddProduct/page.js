@@ -257,25 +257,26 @@
 
 
 
-
 'use client'
 import React, { useState } from 'react';
 import axios from 'axios';
-import UploadArea from '@/app/Assets/upload_area.svg';
+import UploadArea from '@/app/Assets/upload_area.svg'
 import Image from 'next/image';
 
+
 export default function App() {
+  
   const [image, setImage] = useState(null);
   const [productDetails, setProductDetails] = useState({
     name: '',
     category: '',
     price: '',
     stock: '',
-    ventorId: '',
-    godown: 'covai',
+    ventorId:'',
+    godown:'covai',
     sku: '',
-    gst: '',
-    reorderPoint: '',
+    gst: '', 
+    reorderPoint:'',
     description: '',
   });
 
@@ -343,11 +344,11 @@ export default function App() {
             category: '',
             price: '',
             stock: '',
-            ventorId: '',
-            godown: 'covai',
+            ventorId:'',
+            godown:'covai',
             sku: '',
-            reorderPoint: '',
-            gst: '',
+            reorderPoint:'',
+            gst: '', // Reset GST field
             description: '',
           });
 
@@ -360,9 +361,10 @@ export default function App() {
       }
     } catch (error) {
       console.error('Error occurred during product addition:', error.response ? error.response.data : error.message);
-      alert(error.response?.data?.message || 'An error occurred');
+      alert(error.response.data.message);
     }
   };
+
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 p-6">
@@ -409,15 +411,18 @@ export default function App() {
           </div>
 
           <div className="flex flex-col">
-            <label htmlFor="file-input" className="font-medium mb-1">Upload Image</label>
             <div className="flex justify-center">
+            <label htmlFor="file-input">
+
               <Image
                 src={image ? URL.createObjectURL(image) : UploadArea}
                 alt="Upload Area"
                 className="w-32 h-32 object-cover border border-gray-300 rounded-md cursor-pointer"
                 height={150}
                 width={150}
+                
               />
+              </label>
               <input
                 type="file"
                 onChange={imageHandler}
@@ -428,6 +433,28 @@ export default function App() {
               />
             </div>
           </div>
+
+
+          {/* <div className="addproduct-itemfield">
+          <label htmlFor="file-input">
+            <Image
+              src={image ? URL.createObjectURL(image) : UploadArea}
+              alt="Upload Area"
+              className="addproduct-thumbnail-image"
+              height={150}
+              width={150}
+            />
+          </label>
+          <input
+            type="file"
+            onChange={imageHandler}
+            name="image"
+            id="file-input"
+            hidden
+            required
+          />
+        </div> */}
+
 
           <button className="mt-4 w-full bg-blue-500 text-white rounded-md px-4 py-2 hover:bg-blue-600 transition" type="submit">
             Add Product

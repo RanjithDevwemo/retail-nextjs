@@ -620,6 +620,20 @@ res.json({success:false,message:"ventor detail server error ",error});
     }
 })
 
+
+app.get('/allventors',async (req,res)=>{
+    try{
+const allVentors=await Ventor.find({});
+
+if(!allVentors){
+    return res.json({success:false,message:'ventors not found 0 ventors'})
+}
+res.json({success:true,message:allVentors});
+    }catch(error){
+res.json({success:false,message:'server error ',error});
+    }
+})
+
 // Fetch All Cart Items Endpoint
 app.get('/getall/Cartproducts', async (req, res) => {
     try {

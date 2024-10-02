@@ -287,14 +287,14 @@ export default function CustomersDetail() {
           </div>
         </div>
       ) : (
-        <div className="flex flex-col w-full bg-blue-600 text-white p-4">
+        <div className="flex flex-col w-full bg-blue-600 text-white p-4 gap-2">
           <h1 className="text-2xl mb-4">Customers Detail</h1>
           <input
             type="text"
             placeholder="Search Customer Name"
             value={searchTerm}
             onChange={handleSearch}
-            className="mb-4 p-2 rounded"
+            className="mb-4 p-2 rounded text-black"
           />
           {filteredResults.length === 0 ? (
             <p>No customers found.</p>
@@ -331,7 +331,7 @@ export default function CustomersDetail() {
                 <button 
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className="bg-blue-500 text-white rounded px-4 py-2"
+                  className="bg-black text-white rounded px-4 py-2"
                 >
                   Previous
                 </button>
@@ -339,7 +339,7 @@ export default function CustomersDetail() {
                 <button 
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className="bg-blue-500 text-white rounded px-4 py-2"
+                  className="bg-black text-white rounded px-4 py-2"
                 >
                   Next
                 </button>
