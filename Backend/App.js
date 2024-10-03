@@ -735,6 +735,7 @@ app.get('/todaySales', async (req, res) => {
 });
 
 
+
 app.get('/allproducts', async (req, res) => {
     try {
         const allProducts = await Product.find({});
@@ -763,27 +764,72 @@ app.get('/topfive/lowstock/products', async (req, res) => {
 });
 
 
-
-app.put('/allproduct/:id', async (req, res) => {
+// Update Product Endpoint
+app.put('/allproduct/:id', upload.single('product'), async (req, res) => {
     try {
         const productId = req.params.id;
+        const { name, category, price, sku, gst, description, stock, ventorId, godown } = req.body;
 
+        // Basic validation
         if (!productId) {
             return res.status(400).json({ success: false, message: 'Please provide a Product ID.' });
         }
 
-        const productUpdate = await Product.findByIdAndUpdate(productId, req.body, { new: true });
-        
+        // Prepare the update object
+        const updateData = {
+            name,
+            category: category ? category.toLowerCase() : undefined, // Normalize category if provided
+            price,
+            sku,
+            gst,
+            description,
+            stock,
+            ventorId,
+            godown,
+            finalPrice: price ? Number(price) + (Number(price) * gst / 100) : undefined,
+        };
+
+        // Check if a new image file is uploaded
+        if (req.file) {
+            updateData.image = `http://localhost:${port}/images/${req.file.filename}`; // Update the image URL
+        }
+
+        const productUpdate = await Product.findByIdAndUpdate(productId, updateData, { new: true });
+
         if (!productUpdate) {
             return res.status(404).json({ success: false, message: "Product not found." });
         }
 
-        res.json({ success: true, message: "Product updated successfully.", productUpdate });
+        res.json({ success: true, message: "Product updated successfully.", product: productUpdate });
 
     } catch (error) {
+        console.error('Error updating product:', error.message);
         res.status(500).json({ success: false, message: 'Server error.', error });
     }
 });
+
+
+
+// app.put('/allproduct/:id', async (req, res) => {
+//     try {
+//         const productId = req.params.id;
+
+//         if (!productId) {
+//             return res.status(400).json({ success: false, message: 'Please provide a Product ID.' });
+//         }
+
+//         const productUpdate = await Product.findByIdAndUpdate(productId, req.body, { new: true });
+        
+//         if (!productUpdate) {
+//             return res.status(404).json({ success: false, message: "Product not found." });
+//         }
+
+//         res.json({ success: true, message: "Product updated successfully.", productUpdate });
+
+//     } catch (error) {
+//         res.status(500).json({ success: false, message: 'Server error.', error });
+//     }
+// });
 
 app.get('/getsingleproduct/:id',async (req,res)=>{
     try{
