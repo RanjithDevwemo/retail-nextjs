@@ -1,101 +1,3 @@
-// // 'use client';
-// // import { FaUserCog } from "react-icons/fa";
-// // import { useState } from "react";
-// // import { GoHomeFill } from "react-icons/go";
-// // import { TbCategoryFilled } from "react-icons/tb";
-// // import { FaBoxOpen } from "react-icons/fa6";
-// // import { BsBarChartFill } from "react-icons/bs";
-// // import { HiDesktopComputer } from "react-icons/hi";
-// // export default function Filter() {
-// //     const [click, setClick] = useState('Home');
-
-// //     const menuItems = [
-// //         { name: 'Home', icon: <GoHomeFill /> },
-// //         { name: 'User Management', icon: <FaUserCog/>},
-// //         { name: 'Categories', icon: <TbCategoryFilled /> },
-// //         { name: 'Products', icon: <FaBoxOpen /> },
-// //         { name: 'Sales', icon: <BsBarChartFill /> },
-// //         { name: 'Help Center', icon: < HiDesktopComputer/> },
-// //     ];
-
-// //     return (
-// //         <div className="h-screen pl-5 flex items-center rounded-3xl">
-// //             <ul className="font-bold flex gap-4 flex-col">
-// //                 {menuItems.map(({ name, icon }) => (
-// //                     <li
-// //                         key={name}
-// //                         className={`cursor-pointer p-2 rounded-lg transition-all flex items-center gap-2 ${
-// //                             click === name ? 'bg-blue-500 text-white' : ''
-// //                         }`}
-// //                         onClick={() => setClick(name)}
-// //                     >
-// //                         {icon}
-// //                         {name}
-// //                     </li>
-// //                 ))}
-// //             </ul>
-// //         </div>
-// //     );
-// // }
-
-
-// 'use client';
-// import Link from 'next/link';
-// import { FaUserCog } from "react-icons/fa";
-// import { useState } from "react";
-// import { GoHomeFill } from "react-icons/go";
-// import { TbCategoryFilled } from "react-icons/tb";
-// import { FaBoxOpen } from "react-icons/fa6";
-// import { BsBarChartFill } from "react-icons/bs";
-// import { HiDesktopComputer } from "react-icons/hi";
-// import SubNav from "@/app/Components/subnav/page"
-// import BoxContainer from "@/app/Dashboard/BoxContainer/page";
-// import Graph from '../Graph/page';
-// export default function Filter() {
-//     const [click, setClick] = useState('Home');
-
-//     const menuItems = [
-//         { name: 'Home', icon: <GoHomeFill />, path: '/Pages/DashHome' },
-//         { name: 'User Management', icon: <FaUserCog />, path: '/pages/UserManagement' },
-//         { name: 'Categories', icon: <TbCategoryFilled />, path: '/pages/Categories' },
-//         { name: 'Products', icon: <FaBoxOpen />, path: '/pages/Products' },
-//         { name: 'Sales', icon: <BsBarChartFill />, path: '/pages/Sales' },
-//         { name: 'Help Center', icon: <HiDesktopComputer />, path: '/pages/HelpCenter' },
-//     ];
-
-//     return (
-//         <div className="h-screen pl-5 flex items-center rounded-3xl justify-center">
-//             <ul className="font-bold flex gap-4 flex-col">
-//                 {menuItems.map(({ name, icon, path }) => (
-//                     <li
-//                         key={name}
-//                         className={`cursor-pointer p-2 rounded-lg transition-all flex items-center gap-2 ${
-//                             click === name ? 'bg-blue-500 text-white' : 'hover:bg-blue-600 hover:text-white'
-//                         }`}
-//                         onClick={() => setClick(name)}
-//                     >
-//                         <Link href={path} className="flex items-center gap-2">
-//                             {icon}
-//                             <span className="hidden sm:inline">{name}</span> {/* Show name only on small screens and up */}
-//                         </Link>
-//                     </li>
-//                 ))}
-//             </ul>
-            
-//       <div className="flex flex-col w-4/5 p-4">
-   
-//    <div className="mb-4">
-//    <SubNav/>
-//      <BoxContainer />
-//    </div>
-//    <div className="flex-1 mb-20">
-//     <Graph/>
-//    </div>
-//  </div>
-//         </div>
-//     );
-// }
-
 
 'use client';
 import Link from 'next/link';
@@ -179,7 +81,7 @@ export default function Filter() {
                         </div>
                     </div>
                 )}
-                {/* You can add additional conditional rendering for other menu items here */}
+            
             </div>
         </div>
     );
