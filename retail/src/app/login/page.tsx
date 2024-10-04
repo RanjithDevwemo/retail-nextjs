@@ -21,7 +21,8 @@ export default function LoginPage() {
       setLoading(true);
       const response = await axios.post('/api/users/login', user);
       console.log("Login Success:", response.data);
-      router.push('/profile');  
+      router.push('/Dashboard/Filter'); 
+      window.location.reload();
     } catch (error) {
       console.log("Login Error:", error);
     } finally {

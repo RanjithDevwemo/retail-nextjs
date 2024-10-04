@@ -96,8 +96,8 @@ export default function NavBar() {
             </>
           ) : (
             <>
-              <li><Link href='/Pages/Login'>Login</Link></li>
-              <li><Link href='/Pages/SignUp'>SignUp</Link></li>
+              <li><Link href='/login'>Login</Link></li>
+              <li><Link href='/signup'>SignUp</Link></li>
             </>
           )}
         </ul>
