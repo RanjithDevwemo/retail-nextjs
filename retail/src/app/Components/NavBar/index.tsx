@@ -13,6 +13,7 @@ export default function NavBar() {
       <li><Link href='/Components/AddVentor'>Add Ventor</Link></li>
       <li><Link href='/Pages/AllProducts'>Products</Link></li>
       <li><Link href='/Dashboard/Filter'>DashHome</Link></li>
+      <li><Link href='/login'>Login</Link></li>
       
     </ul>
 </div>
