@@ -1,22 +1,93 @@
-import Link from "next/link"
+// import Link from "next/link"
 
+
+// export default function NavBar() {
+//   return (
+//     <div className="flex items-center justify-around gap-2">
+//       NavBar
+// <div >
+//     <ul className="flex items-center justify-between gap-2">
+//         <li><Link href='/Components/AddProduct'>AddProduct</Link></li>
+//       <li><Link href='/Components/AllProducts'>AllProducts</Link></li>
+//       <li><Link href='/Components/WareHouse'>WareHouse</Link></li>
+//       <li><Link href='/Components/AddVentor'>Add Ventor</Link></li>
+//       <li><Link href='/Pages/AllProducts'>Products</Link></li>
+//       <li><Link href='/Dashboard/Filter'>DashHome</Link></li>
+//       <li><Link href='/login'>Login</Link></li>
+      
+//     </ul>
+// </div>
+//     </div>
+//   )
+// }
+
+
+
+
+
+
+
+
+'use client';
+
+import axios from "axios";
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 export default function NavBar() {
+  const [userName, setUserName] = useState(null);
+  const router = useRouter();
+
+  const fetchUserDetails = async () => {
+    try {
+      const res = await axios.get('/api/users/me');
+      setUserName(res.data.data.username);
+    } catch (error) {
+      console.error(error.message);
+      setUserName(null); // User not logged in
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await axios.get('/api/users/logout');
+      toast.success("Logout successful");
+      setUserName(null);
+      router.push('/login');
+    } catch (error) {
+      console.error(error.message);
+      toast.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserDetails();
+  }, []);
+
   return (
     <div className="flex items-center justify-around gap-2">
-      NavBar
-<div >
-    <ul className="flex items-center justify-between gap-2">
-        <li><Link href='/Components/AddProduct'>AddProduct</Link></li>
-      <li><Link href='/Components/AllProducts'>AllProducts</Link></li>
-      <li><Link href='/Components/WareHouse'>WareHouse</Link></li>
-      <li><Link href='/Components/AddVentor'>Add Ventor</Link></li>
-      <li><Link href='/Pages/AllProducts'>Products</Link></li>
-      <li><Link href='/Dashboard/Filter'>DashHome</Link></li>
-      <li><Link href='/login'>Login</Link></li>
-      
-    </ul>
-</div>
+      <div>
+        <ul className="flex items-center justify-between gap-2">
+          <li><Link href='/Components/AddProduct'>AddProduct</Link></li>
+          <li><Link href='/Components/AllProducts'>AllProducts</Link></li>
+          <li><Link href='/Components/WareHouse'>WareHouse</Link></li>
+          <li><Link href='/Components/AddVentor'>Add Ventor</Link></li>
+          <li><Link href='/Pages/AllProducts'>Products</Link></li>
+          <li><Link href='/Dashboard/Filter'>DashHome</Link></li>
+        </ul>
+      </div>
+
+      {/* Display user info and logout if logged in */}
+      {userName ? (
+        <div className="flex items-center gap-4">
+          <span>{`${userName}`}</span>
+          <button onClick={logout} className="bg-blue-500 text-white p-2">Logout</button>
+        </div>
+      ) : (
+        <Link href="/login" className="bg-blue-500 text-white p-2">Login</Link>
+      )}
     </div>
-  )
+  );
 }

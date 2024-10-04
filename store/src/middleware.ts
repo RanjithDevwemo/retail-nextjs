@@ -24,6 +24,7 @@ export const config = {
     '/Pages/DashBoard',
     '/Pages/Purchase',
     '/Pages/Sales',
+    '/Components/AddVentor/Component/TodayTopFive/Pages/AllProducts',
     '/Component/TodayTopFive',
     '/Component/LowStockFive',
     '/',

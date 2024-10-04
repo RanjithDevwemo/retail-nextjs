@@ -4,7 +4,7 @@ import { Connect } from "@/dbConfig/dbConfig";
 import UserVal from "@/models/UserModel"
 import { NextRequest,NextResponse } from "next/server";
 import bcryptjs from 'bcryptjs';
-// import { error } from "console";
+import { error } from "console";
 import jwt from "jsonwebtoken"
 
 Connect();
