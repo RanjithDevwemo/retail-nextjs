@@ -14,10 +14,12 @@ export default function LoginPage() {
   const [user, setUser] = useState({
     email: '',
     password: '',
+    tenantId:''
   });
 
   const onLogin = async () => {
     try {
+    console.log(user);
       setLoading(true);
       const response = await axios.post('/api/users/login', user);
       console.log("Login Success:", response.data);
@@ -60,6 +62,16 @@ export default function LoginPage() {
         value={user.password}
         name="password"
         onChange={(e) => setUser({ ...user, password: e.target.value })}
+        className="border border-gray-300 rounded-md px-4 py-2 mb-4"
+      />
+
+<label htmlFor="tenantId" className="mt-2">tenantId</label>
+      <input
+        type="text"
+        placeholder="tenantId"
+        value={user.tenantId}
+        name="tenantId"
+        onChange={(e) => setUser({ ...user, tenantId: e.target.value })}
         className="border border-gray-300 rounded-md px-4 py-2 mb-4"
       />
 

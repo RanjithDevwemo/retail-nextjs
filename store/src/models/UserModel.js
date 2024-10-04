@@ -17,6 +17,11 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: [true, "Please provide a password"],
     },
+    tenantId:{
+        type:String,
+        require:[true,"please Enter a TenantId"],
+        unique:true,
+    },
     isVerified: {
         type: Boolean,
         default: false,
