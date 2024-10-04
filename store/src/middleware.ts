@@ -21,12 +21,11 @@ if(!isPublicPath && !token){
 // See "Matching Paths" below to learn more
 export const config = {
   matcher: [
-    '/Components/AddProduct',
-    '/Components/AllProducts',
-    '/Components/WareHouse',
-    '/Components/AddVentor',
-    '/Pages/AllProducts',
-    '/Dashboard/Filter',
+    '/Pages/DashBoard',
+    '/Pages/Purchase',
+    '/Pages/Sales',
+    '/Component/TodayTopFive',
+    '/Component/LowStockFive',
     '/',
     '/profile',
     '/login',

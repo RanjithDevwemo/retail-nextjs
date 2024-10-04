@@ -35,3 +35,4 @@ const UserSchema = new mongoose.Schema({
 const UserVal = mongoose.models.user || mongoose.model('user', UserSchema);
 
 export default UserVal;
+
