@@ -21,7 +21,7 @@ const app = express();
 const port = process.env.PORT || 4000;
 const JWT_SECRET = process.env.JWT_SECRET || 'retail_jwt_secret';
 const JWT_STORE='retail_store_jwt';
-const connectDB=require('./Config/db');
+// const connectDB=require('./Config/db');
 // Middleware
 
 //Routes
@@ -31,27 +31,12 @@ const connectDB=require('./Config/db');
 
 const productRoutes=require('./routes/productRoutes');
 // const orderRoutes = require('./routes/productRoutes');
-
+const {Connect}=require('../retail/src/dbConfig/dbConfig');
+Connect();
 app.use(cors());
 app.use(express.json());
 
-connectDB();
 
-
-app.post('/gettenantId', async (req, res) => {
-    try {
-        const { tenant } = req.body;
-        if (!tenant) {
-            return res.json({ success: false, message: "Please enter the tenant ID" });
-        }
-
-        // Pass tenant ID to the connectDB function
-        await connectDB(tenant);
-        res.json({ success: true, message: `Connected to tenant: ${tenant}` });
-    } catch (error) {
-        res.json({ success: false, message: "Server error", error: error.message });
-    }
-});
 
 
 // Image Storage Setup with Multer
