@@ -38,6 +38,22 @@ app.use(express.json());
 connectDB();
 
 
+app.post('/gettenantId', async (req, res) => {
+    try {
+        const { tenant } = req.body;
+        if (!tenant) {
+            return res.json({ success: false, message: "Please enter the tenant ID" });
+        }
+
+        // Pass tenant ID to the connectDB function
+        await connectDB(tenant);
+        res.json({ success: true, message: `Connected to tenant: ${tenant}` });
+    } catch (error) {
+        res.json({ success: false, message: "Server error", error: error.message });
+    }
+});
+
+
 // Image Storage Setup with Multer
 const storage = multer.diskStorage({
     destination: path.join(__dirname, 'upload/images'),

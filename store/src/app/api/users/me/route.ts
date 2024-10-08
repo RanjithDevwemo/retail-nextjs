@@ -1,24 +1,57 @@
 
 
 
+// // import { getDataFromToken } from "@/helpers/getDataFromToken";
 // import { getDataFromToken } from "@/helpers/getDataFromToken";
-import { getDataFromToken } from "@/helpers/getDataFromToken";
+// import { NextRequest, NextResponse } from "next/server";
+// import UserVal from "@/models/UserModel";
+// import { Connect } from "@/dbConfig/dbConfig";
+
+// Connect();
+
+// export async function GET(request: NextRequest) {
+//     try {
+//         const userId = await getDataFromToken(request);
+//         const user = await UserVal.findOne({ _id: userId }).select("-password");
+
+//         return NextResponse.json({
+//             message: "User found",
+//             data: user,
+//         });
+//     } catch (error) {
+//         return NextResponse.json({ error: error.message }, { status: 400 });
+//     }
+// }
+
+
+
+
+
+
+
+// me.ts
 import { NextRequest, NextResponse } from "next/server";
+import { getDataFromToken } from "@/helpers/getDataFromToken";
 import UserVal from "@/models/UserModel";
 import { Connect } from "@/dbConfig/dbConfig";
-
-Connect();
+// import { Connect } from "@/dbConfig/dbConfig";
 
 export async function GET(request: NextRequest) {
     try {
         const userId = await getDataFromToken(request);
-        const user = await UserVal.findOne({ _id: userId }).select("-password");
+        const user = await UserVal.findById(userId).select("-password");
+
+        if (!user) {
+            return NextResponse.json({ error: "User not found" }, { status: 404 });
+        }
 
         return NextResponse.json({
             message: "User found",
             data: user,
         });
     } catch (error) {
-        return NextResponse.json({ error: error.message }, { status: 400 });
+        console.error("Fetch user error:", error);
+        return NextResponse.json({ error: "An error occurred." }, { status: 400 });
     }
 }
+
