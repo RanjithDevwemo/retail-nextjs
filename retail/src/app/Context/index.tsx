@@ -16,7 +16,7 @@ export function AppWrapper({ children }) {
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [getAllOrders, setGetAllOrders] = useState('');
-    
+    const[allVentors,setAllVentors]=useState('');
     // New state for product statistics
     const [productStats, setProductStats] = useState({
         totalProducts: 0,
@@ -151,6 +151,21 @@ export function AppWrapper({ children }) {
     console.log("totalAmount from context : ",totalAmount);
     
 
+const allVentorsGet=async()=>{
+try{
+const response=await axios.get('http://localhost:4000/allventors');
+setAllVentors(response.data);
+
+}catch(error){
+    console.log("All vendors cannot fetching : ",error);
+    
+}
+    }
+    useEffect(() => {
+        allVentorsGet();
+    }, []);
+
+
     return (
         <AppContext.Provider value={{ 
             auth, 
@@ -163,7 +178,8 @@ export function AppWrapper({ children }) {
             productStats,
             todayTotal,
             totalAmount,
-            totalQuantity
+            totalQuantity,
+            allVentors
         }}>
             {children}
         </AppContext.Provider>
