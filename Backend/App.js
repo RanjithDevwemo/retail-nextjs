@@ -31,8 +31,9 @@ const JWT_STORE='retail_store_jwt';
 
 const productRoutes=require('./routes/productRoutes');
 // const orderRoutes = require('./routes/productRoutes');
-const {Connect}=require('../retail/src/dbConfig/dbConfig');
-Connect();
+// const {Connect}=require('../retail/src/dbConfig/dbConfig');
+// Connect();
+const connectDB=require('./Config/db')
 app.use(cors());
 app.use(express.json());
 
@@ -68,6 +69,25 @@ app.post('/upload', upload.single('product'), (req, res) => {
 // app.use('/admin', adminRouter);
 app.use('/api', productRoutes);
 // app.use('/api', orderRoutes);
+
+
+app.post('/passTenantId', async (req, res) => {
+    const { tenantId } = req.body;
+console.log(tenantId);
+
+    // Validate tenant ID
+    if (!tenantId) {
+        return res.status(400).json({ error: 'Tenant ID is required' });
+    }
+
+    try {
+        await connectDB(tenantId); 
+        return res.status(200).json({ message: 'Tenant ID processed successfully' });
+    } catch (error) {
+        console.error('Error processing tenant ID:', error.message);
+        return res.status(500).json({ error: 'Failed to process tenant ID' });
+    }
+});
 
 
 // User Signup Endpoint
@@ -1071,9 +1091,6 @@ app.get('/getname/:id', async (req, res) => {
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
-
-
-
 
 
 
