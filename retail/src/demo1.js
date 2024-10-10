@@ -1,22 +1,33 @@
-analys my code and rewrite correctly
+analis this dbConfig 
 
 
-// dbConfig.ts
-import mongoose from 'mongoose';
+// dbConfig.js
+const mongoose = require('mongoose');
 
-export async function Connect(tenantId: string) {
+let isConnected = false; // Connection state
+
+async function Connect(tenantId) {
     const MONGO_URI = `mongodb+srv://ranjithdevwemo2:ranjithdevwemo2@cluster0.3ckmctb.mongodb.net/${tenantId}`;
+
+    if (isConnected) {
+        console.log(`Already connected to database: ${tenantId}`);
+        return;
+    }
 
     try {
         await mongoose.connect(MONGO_URI);
+        isConnected = true;
         console.log(`MongoDB connected successfully to database: ${tenantId}`);
     } catch (error) {
         console.error('MongoDB connection error:', error);
         process.exit(1);
     }
 }
-this dbConfig file and this is 
 
+module.exports ={Connect};
+and this is 
+
+model.js
 // UserModel.ts
 import mongoose from 'mongoose';
 
@@ -53,63 +64,12 @@ const UserSchema = new mongoose.Schema({
     verifyTokenExpiry: Date,
 });
 
-const UserVal = mongoose.models.user || mongoose.model('user', UserSchema);
+const UserVal = mongoose.models.User || mongoose.model('User', UserSchema);
 
 export default UserVal;
-user model page and tkonenverify page is 
-import { NextRequest } from "next/server";
-import jwt from 'jsonwebtoken'
-import { request } from "http";
 
-export const getDataFromToken=(request:NextRequest)=>{
-    try{
-        const Token_Secret='Secret_Key'
-const token=request.cookies.get('token')?.value||'';
-const decodedToken:any=jwt.verify(token,Token_Secret!);
-return decodedToken.id;
-    }catch(error){
-        console.log(error);
-        
-    }
-}
 
-and this is middleware 
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
- 
-// This function can be marked `async` if using `await` inside
-export function middleware(request: NextRequest) {
-//   return NextResponse.redirect(new URL('/home', request.url))
-const path=request.nextUrl.pathname
-
-const isPublicPath=path=='/login' || path=='/signup'
-
-const token=request.cookies.get('token')?.value||''
-
-if(isPublicPath && token){
-  return NextResponse.redirect(new URL('/',request.nextUrl))
-}
-if(!isPublicPath && !token){
-  return NextResponse.redirect(new URL('/login',request.nextUrl))
-}
-}
- 
-// See "Matching Paths" below to learn more
-export const config = {
-  matcher: [
-    '/Components/AddProduct',
-    '/Components/AllProducts',
-    '/Components/WareHouse',
-    '/Components/AddVentor',
-    '/Pages/AllProducts',
-    '/Dashboard/Filter',
-    '/',
-    '/profile',
-    '/login',
-    '/signup',
-  ]
-} and login and signup is 
-
+this code login.ts
 
 // login.ts
 import { Connect } from "@/dbConfig/dbConfig";
@@ -129,7 +89,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "Tenant ID is required" }, { status: 400 });
         }
 
-        await Connect(tenantId); // Connect to the tenant database
+        await Connect(tenantId);
 
         const user = await UserVal.findOne({ email });
 
@@ -162,32 +122,13 @@ export async function POST(request: NextRequest) {
         });
 
         return response;
-
     } catch (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        console.error("Login error:", error);
+        return NextResponse.json({ error: "An error occurred during login." }, { status: 500 });
     }
 }
-this is login ts file and this is
 
-import { NextResponse } from "next/server";
-
-
-export async function GET(){
-    try{
-const response=await NextResponse.json({
-    message:"Logout Successfull",
-    success:true,
-})
-response.cookies.set("token","",{
-    httpOnly:true,expires:new Date(0)
-})
-return response;
-    }catch(error){
-        return NextResponse.json({error:error.message},{status:500})
-    }
-}
-logout.ts file and 
-
+and this is signup.ts
 // signup.ts
 import { Connect } from "@/dbConfig/dbConfig";
 import UserVal from "@/models/UserModel";
@@ -203,11 +144,11 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "Tenant ID is required" }, { status: 400 });
         }
 
-        await Connect(tenantId); // Connect to the tenant database
+        await Connect(tenantId);
 
-        const user = await UserVal.findOne({ email });
+        const userExists = await UserVal.findOne({ email });
 
-        if (user) {
+        if (userExists) {
             return NextResponse.json({ error: "User already exists" }, { status: 400 });
         }
 
@@ -218,49 +159,71 @@ export async function POST(request: NextRequest) {
             username,
             password: hashedPassword,
             email,
-            tenantId, // Store tenant ID
+            tenantId,
         });
 
-        const saveUser = await newUser.save();
+        await newUser.save();
         return NextResponse.json({
             message: 'User created successfully',
             success: true,
-            saveUser
         });
-
     } catch (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        console.error("Signup error:", error);
+        return NextResponse.json({ error: "An error occurred during signup." }, { status: 500 });
     }
 }
-this is signup.ts and this is 
 
-// import { getDataFromToken } from "@/helpers/getDataFromToken";
-import { getDataFromToken } from "@/helpers/getDataFromToken";
+and this is me.ts 
+
+
+// me.ts
 import { NextRequest, NextResponse } from "next/server";
+import { getDataFromToken } from "@/helpers/getDataFromToken";
 import UserVal from "@/models/UserModel";
 import { Connect } from "@/dbConfig/dbConfig";
-
-Connect();
+// import { Connect } from "@/dbConfig/dbConfig";
 
 export async function GET(request: NextRequest) {
     try {
         const userId = await getDataFromToken(request);
-        const user = await UserVal.findOne({ _id: userId }).select("-password");
+        const user = await UserVal.findById(userId).select("-password");
+
+        if (!user) {
+            return NextResponse.json({ error: "User not found" }, { status: 404 });
+        }
 
         return NextResponse.json({
             message: "User found",
             data: user,
         });
     } catch (error) {
-        return NextResponse.json({ error: error.message }, { status: 400 });
+        console.error("Fetch user error:", error);
+        return NextResponse.json({ error: "An error occurred." }, { status: 400 });
     }
 }
-menubar.ts verifyTokenExpiry and ui code is
+and this is logout.ts
+// logout.ts
+import { NextResponse } from "next/server";
 
-login.tsx
+export async function GET() {
+    try {
+        const response = NextResponse.json({
+            message: "Logout successful",
+            success: true,
+        });
+        response.cookies.set("token", "", {
+            httpOnly: true,
+            expires: new Date(0),
+        });
+        return response;
+    } catch (error) {
+        console.error("Logout error:", error);
+        return NextResponse.json({ error: "An error occurred during logout." }, { status: 500 });
+    }
+}
 
+this is login.js
 
-// login.js
 'use client';
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -273,7 +236,7 @@ export default function LoginPage() {
     const [user, setUser] = useState({
         email: '',
         password: '',
-        tenantId: '', // Add tenantId
+        tenantId: '',
     });
 
     const [buttonDisabled, setButtonDisabled] = useState(true);
@@ -282,9 +245,19 @@ export default function LoginPage() {
     const onLogin = async () => {
         try {
             setLoading(true);
+            // Attempt to log in the user
             const response = await axios.post('/api/users/login', user);
-            toast.success("Login successful!",response.data);
+            
+            // Pass the tenant ID to the backend
+            console.log(user.tenantId);
+            
+           await axios.post('http://localhost:4000/passTenantId', { tenantId: user.tenantId });
+
+
+            toast.success("Login successful!");
+            // router.push('/Pages/DashBoard');
             router.push('/Dashboard/Filter');
+
         } catch (error) {
             toast.error("Login failed");
         } finally {
@@ -301,20 +274,37 @@ export default function LoginPage() {
             <h1 className="text-2xl font-bold mb-4">{loading ? 'Logging in...' : 'Login'}</h1>
             <hr className="mb-4" />
 
-            <input type="email" placeholder="Email" value={user.email} onChange={(e) => setUser({ ...user, email: e.target.value })} />
-            <input type="password" placeholder="Password" value={user.password} onChange={(e) => setUser({ ...user, password: e.target.value })} />
-            <input type="text" placeholder="Tenant ID" value={user.tenantId} onChange={(e) => setUser({ ...user, tenantId: e.target.value })} />
+            <input
+                type="email"
+                placeholder="Email"
+                value={user.email}
+                onChange={(e) => setUser({ ...user, email: e.target.value })}
+            />
+            <input
+                type="password"
+                placeholder="Password"
+                value={user.password}
+                onChange={(e) => setUser({ ...user, password: e.target.value })}
+            />
+            <input
+                type="text"
+                placeholder="Tenant ID"
+                value={user.tenantId}
+                onChange={(e) => setUser({ ...user, tenantId: e.target.value })}
+            />
 
-            <button onClick={onLogin} disabled={buttonDisabled || loading}>{loading ? "Logging in..." : "Login"}</button>
+            <button onClick={onLogin} disabled={buttonDisabled || loading}>
+                {loading ? "Logging in..." : "Login"}
+            </button>
             <p>Don't have an account? <Link href="/signup">Sign up here</Link></p>
         </div>
     );
 }
-and signup.tsx is
+and Signup.js
 
 
 
-// signup.js
+// signup.tsx
 'use client';
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -328,7 +318,7 @@ export default function SignUpPage() {
         email: '',
         password: '',
         username: '',
-        tenantId: '', // Add tenantId
+        tenantId: '',
     });
 
     const [buttonDisabled, setButtonDisabled] = useState(true);
@@ -337,7 +327,7 @@ export default function SignUpPage() {
     const onSignup = async () => {
         try {
             setLoading(true);
-            const response = await axios.post("/api/users/signup", user);
+            await axios.post("/api/users/signup", user);
             toast.success("Signup successful!");
             router.push('/login');
         } catch (error) {
@@ -361,8 +351,74 @@ export default function SignUpPage() {
             <input type="password" placeholder="Password" value={user.password} onChange={(e) => setUser({ ...user, password: e.target.value })} />
             <input type="text" placeholder="Tenant ID" value={user.tenantId} onChange={(e) => setUser({ ...user, tenantId: e.target.value })} />
 
-            <button onClick={onSignup} disabled={buttonDisabled || loading}>{buttonDisabled ? "Signing Up..." : "Sign Up"}</button>
+            <button onClick={onSignup} disabled={buttonDisabled || loading}>{loading ? "Signing Up..." : "Sign Up"}</button>
             <p>Already have an account? <Link href="/login">Login here</Link></p>
+        </div>
+    );
+}
+and this is navbar.js
+
+
+
+// NavBar.tsx
+'use client';
+import axios from "axios";
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+
+export default function NavBar() {
+    const [userName, setUserName] = useState(null);
+    const router = useRouter();
+
+    const fetchUserDetails = async () => {
+        try {
+            const res = await axios.get('/api/users/me');
+            setUserName(res.data.data.username);
+        } catch (error) {
+            console.error(error.message);
+            setUserName(null); // User not logged in
+        }
+    };
+
+    const logout = async () => {
+        try {
+            await axios.get('/api/users/logout');
+            toast.success("Logout successful");
+            setUserName(null);
+            router.push('/login');
+        } catch (error) {
+            console.error(error.message);
+            toast.error(error.message);
+        }
+    };
+
+    useEffect(() => {
+        fetchUserDetails();
+    }, []);
+
+    return (
+        <div className="flex items-center justify-around gap-2">
+            <div>
+                <ul className="flex items-center justify-between gap-2">
+                    <li><Link href='/Components/AddProduct'>Add Product</Link></li>
+                    <li><Link href='/Components/AllProducts'>All Products</Link></li>
+                    <li><Link href='/Components/WareHouse'>Warehouse</Link></li>
+                    <li><Link href='/Components/AddVendor'>Add Vendor</Link></li>
+                    <li><Link href='/Pages/AllProducts'>Products</Link></li>
+                    <li><Link href='/Dashboard/Filter'>Dashboard Home</Link></li>
+                </ul>
+            </div>
+
+            {userName ? (
+                <div className="flex items-center gap-4">
+                    <span>{`${userName}`}</span>
+                    <button onClick={logout} className="bg-blue-500 text-white p-2">Logout</button>
+                </div>
+            ) : (
+                <Link href="/login" className="bg-blue-500 text-white p-2">Login</Link>
+            )}
         </div>
     );
 }
