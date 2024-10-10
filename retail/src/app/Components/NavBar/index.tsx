@@ -10,17 +10,21 @@ import toast from "react-hot-toast";
 
 export default function NavBar() {
     const [userName, setUserName] = useState(null);
+    const[data,setData]=useState('');
     const router = useRouter();
 
     const fetchUserDetails = async () => {
         try {
             const res = await axios.get('/api/users/me');
+            setData(res.data.data.role);
             setUserName(res.data.data.username);
         } catch (error) {
             console.error(error.message);
             setUserName(null); // User not logged in
         }
     };
+    console.log(data);
+    
 
     const logout = async () => {
         try {

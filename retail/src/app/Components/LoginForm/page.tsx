@@ -1,4 +1,7 @@
 
+
+
+// login.tsx
 'use client';
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -20,19 +23,9 @@ export default function LoginPage() {
     const onLogin = async () => {
         try {
             setLoading(true);
-            // Attempt to log in the user
             const response = await axios.post('/api/users/login', user);
-            
-            // Pass the tenant ID to the backend
-            console.log(user.tenantId);
-            
-           await axios.post('http://localhost:4000/passTenantId', { tenantId: user.tenantId });
-
-
             toast.success("Login successful!");
-            // router.push('/Pages/DashBoard');
             router.push('/Dashboard/Filter');
-
         } catch (error) {
             toast.error("Login failed");
         } finally {
@@ -49,28 +42,11 @@ export default function LoginPage() {
             <h1 className="text-2xl font-bold mb-4">{loading ? 'Logging in...' : 'Login'}</h1>
             <hr className="mb-4" />
 
-            <input
-                type="email"
-                placeholder="Email"
-                value={user.email}
-                onChange={(e) => setUser({ ...user, email: e.target.value })}
-            />
-            <input
-                type="password"
-                placeholder="Password"
-                value={user.password}
-                onChange={(e) => setUser({ ...user, password: e.target.value })}
-            />
-            <input
-                type="text"
-                placeholder="Tenant ID"
-                value={user.tenantId}
-                onChange={(e) => setUser({ ...user, tenantId: e.target.value })}
-            />
+            <input type="email" placeholder="Email" value={user.email} onChange={(e) => setUser({ ...user, email: e.target.value })} />
+            <input type="password" placeholder="Password" value={user.password} onChange={(e) => setUser({ ...user, password: e.target.value })} />
+            <input type="text" placeholder="Tenant ID" value={user.tenantId} onChange={(e) => setUser({ ...user, tenantId: e.target.value })} />
 
-            <button onClick={onLogin} disabled={buttonDisabled || loading}>
-                {loading ? "Logging in..." : "Login"}
-            </button>
+            <button onClick={onLogin} disabled={buttonDisabled || loading}>{loading ? "Logging in..." : "Login"}</button>
             <p>Don't have an account? <Link href="/signup">Sign up here</Link></p>
         </div>
     );

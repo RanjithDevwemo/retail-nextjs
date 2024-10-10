@@ -1,6 +1,5 @@
 analis this dbConfig 
 
-
 // dbConfig.js
 const mongoose = require('mongoose');
 
@@ -221,8 +220,42 @@ export async function GET() {
         return NextResponse.json({ error: "An error occurred during logout." }, { status: 500 });
     }
 }
+and this is MiddlewareNotFoundError.ts
 
-this is login.js
+// middleware.ts
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+export function middleware(request: NextRequest) {
+    const path = request.nextUrl.pathname;
+    const isPublicPath = path === '/login' || path === '/signup';
+    const token = request.cookies.get('token')?.value || '';
+
+    if (isPublicPath && token) {
+        return NextResponse.redirect(new URL('/', request.url));
+    }
+
+    if (!isPublicPath && !token) {
+        return NextResponse.redirect(new URL('/login', request.url));
+    }
+}
+
+export const config = {
+    matcher: [
+        '/Components/AddProduct',
+        '/Components/AllProducts',
+        '/Components/WareHouse',
+        '/Components/AddVendor',
+        '/Pages/AllProducts',
+        '/Dashboard/Filter',
+        '/',
+        '/profile',
+        '/login',
+        '/signup',
+    ],
+};
+
+and this is login.js
 
 'use client';
 import Link from "next/link";
@@ -422,3 +455,4 @@ export default function NavBar() {
         </div>
     );
 }
+rewrite add authentication and authorization sing and login require add selecte option user or admin admin only access this page
