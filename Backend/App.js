@@ -2074,7 +2074,6 @@ app.get('/topfive/lowstock/products', async (req, res) => {
 });
 
 
-
 app.put('/allproduct/:id', async (req, res) => {
     try {
         const productId = req.params.id;
