@@ -1182,8 +1182,161 @@ app.post('/upload', upload.single('product'), (req, res) => {
 
 // app.use('/store',StoreRoute);
 // app.use('/admin', adminRouter);
-app.use('/api', productRoutes);
+// app.use('/api', productRoutes);
 // app.use('/api', orderRoutes);
+
+
+
+// app.post('/api/addproduct', async (req, res) => {
+//     // console.log(req.body); 
+
+//     try {
+//         const { 
+//             name, 
+//             image, 
+//             category, 
+//             price, 
+//             sku, 
+//             gst, 
+//             description, 
+//             stocks, // Object with godown as keys
+//             ventorId, 
+//             reorderPoints // Object with godown as keys
+//         } = req.body;
+
+//         // Basic validation
+//         if (!name || !image || !category || !price || !sku || !gst || !description || !ventorId || !stocks || !reorderPoints) {
+//             return res.status(400).json({ success: false, message: 'Missing required fields' });
+//         }
+
+//         // Normalize category
+//         const normalizedCategory = category.toLowerCase();
+
+//         // Calculate final price
+//         const finalPrice = Number(price) + (Number(price) * Number(gst) / 100);
+
+//         // Check if SKU already exists
+//         const existingProduct = await Product.findOne({ sku });
+//         if (existingProduct) {
+//             return res.status(400).json({ success: false, message: 'Product with this SKU already exists' });
+//         }
+
+//         // Check stock availability in each godown
+//         for (const [godownKey, stockValue] of Object.entries(stocks)) {
+//             if (stockValue <= 0) {
+//                 return res.status(400).json({ success: false, message: `Out of stock in ${godownKey}` });
+//             }
+//         }
+
+//         // Create and save new product
+//         const product = new Product({
+//             name,
+//             image,
+//             category: normalizedCategory,
+//             price,
+//             sku,
+//             gst,
+//             description,
+//             stock: stocks, // Object of stocks by godown
+//             ventorId,
+//             reorderPoints, // Object of reorder points by godown
+//             finalPrice
+//         });
+
+//         await product.save();
+//         return res.json({ success: true, message: 'Product added successfully', product });
+//     } catch (error) {
+//         console.error('Error adding product:', error.message);
+//         return res.status(500).json({ success: false, message: 'Failed to add product' });
+//     }
+// });
+
+
+
+
+app.post('/api/addproduct', async (req, res) => {
+    try {
+        const { 
+            name, 
+            image, 
+            category, 
+            price, 
+            sku, 
+            gst, 
+            description, 
+            stocks, 
+            ventorId, 
+            reorderPoints 
+        } = req.body;
+
+        // Basic validation
+        if (!name || !image || !category || !price || !sku || !gst || !description || !ventorId || !stocks || !reorderPoints) {
+            return res.status(400).json({ success: false, message: 'Missing required fields' });
+        }
+
+        // Normalize category
+        const normalizedCategory = category.toLowerCase();
+
+        // Calculate final price
+        const finalPrice = Number(price) + (Number(price) * Number(gst) / 100);
+
+        // Check if SKU already exists
+        const existingProduct = await Product.findOne({ sku });
+        if (existingProduct) {
+            return res.status(400).json({ success: false, message: 'Product with this SKU already exists' });
+        }
+
+        // Check stock availability in each godown
+        for (const [godownKey, stockValue] of Object.entries(stocks)) {
+            if (stockValue <= 0) {
+                return res.status(400).json({ success: false, message: `Out of stock in ${godownKey}` });
+            }
+        }
+
+        // Create and save new product
+        const product = new Product({
+            name,
+            image,
+            category: normalizedCategory,
+            price,
+            sku,
+            gst,
+            description,
+            stock: stocks, // Object of stocks by godown
+            ventorId,
+            reorderPoints, // Object of reorder points by godown
+            finalPrice
+        });
+
+        // Calculate total stock value
+        product.calculateTotalStockValue();
+
+        await product.save();
+        return res.json({ success: true, message: 'Product added successfully', product });
+    } catch (error) {
+        console.error('Error adding product:', error.message);
+        return res.status(500).json({ success: false, message: 'Failed to add product' });
+    }
+});
+
+
+
+
+//Admin Product get values in Product Id
+app.get('/getproduct/:id',async (req,res)=>{
+    try{
+    let productId=req.params.id;
+    let singleProduct= await Product.findById(productId);
+    res.json(singleProduct);
+    }catch(error){
+        res.json({success:false,message:'cannot get the single product : '+error});
+        console.log("cannot get single product : "+error);
+        
+    }
+
+})
+ 
+
 
 
 // User Signup Endpoint
@@ -1942,6 +2095,7 @@ app.put('/allproduct/:id', async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error.', error });
     }
 });
+
 
 app.get('/getsingleproduct/:id',async (req,res)=>{
     try{
