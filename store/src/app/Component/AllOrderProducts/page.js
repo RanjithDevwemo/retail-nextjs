@@ -116,56 +116,56 @@ import { useState, useEffect } from 'react';
 
 function Products() {
     const { filteredProducts, searchTerm, handleSearchChange, billCart } = useAppContext();
-    const [sortOrder, setSortOrder] = useState('asc'); // State for sorting order
-    const [products, setProducts] = useState([]); // State for products
+    const [sortOrder, setSortOrder] = useState('asc');
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [selectedWarehouse, setSelectedWarehouse] = useState('');
 
-    // Simulating data fetching
-    useEffect(() => {
-        // Replace this with an actual fetch call to your API
-        const fetchData = async () => {
-            // Fetch products from API (placeholder)
-            const response = await fetch('/api/products'); // Replace with your actual API endpoint
-            const data = await response.json();
-            setProducts(data);
-        };
-
-        fetchData();
-    }, []);
+ 
 
     const handleCardClick = (product) => {
         const totalStock = Object.values(product.stock).reduce((acc, val) => acc + Number(val), 0);
         if (totalStock > 0) {
-            billCart(
-                product._id,
-                product.name,
-                product.finalPrice,
-                product.category,
-                product.gst,
-                product.reorderPoints,
-                product.sku
-            );
+            setSelectedProduct(product);
         } else {
             alert("Out of stock, cannot order this product");
         }
     };
 
-    // Function to sort products based on the selected order
-    const sortedProducts = [...(filteredProducts.length > 0 ? filteredProducts : products)].sort((a, b) => {
-        if (sortOrder === 'asc') {
-            return a.name.localeCompare(b.name);
-        } else if (sortOrder === 'desc') {
-            return b.name.localeCompare(a.name);
-        } else if (sortOrder === 'lowToHigh') {
-            return a.finalPrice - b.finalPrice;
-        } else if (sortOrder === 'highToLow') {
-            return b.finalPrice - a.finalPrice;
+    const handleOrder = () => {
+        if (selectedWarehouse && selectedProduct) {
+            const stockAvailable = selectedProduct.stock[selectedWarehouse];
+            if (stockAvailable > 0) {
+                billCart(
+                    selectedProduct._id,
+                    selectedProduct.name,
+                    selectedProduct.finalPrice,
+                    selectedProduct.category,
+                    selectedProduct.gst,
+                    selectedProduct.reorderPoints,
+                    selectedProduct.sku
+                );
+                alert(`Ordered ${selectedWarehouse} stock of ${selectedProduct.name}`);
+            } else {
+                alert("Selected warehouse stock is unavailable");
+            }
+            setSelectedProduct(null);
         }
-        return 0; // Fallback if none matches
-    });
-
-    const handleSortChange = (e) => {
-        setSortOrder(e.target.value);
     };
+
+    const sortedProducts = [...filteredProducts].sort((a, b) => {
+        switch (sortOrder) {
+            case 'asc':
+                return a.name.localeCompare(b.name);
+            case 'desc':
+                return b.name.localeCompare(a.name);
+            case 'lowToHigh':
+                return a.finalPrice - b.finalPrice;
+            case 'highToLow':
+                return b.finalPrice - a.finalPrice;
+            default:
+                return 0;
+        }
+    });
 
     return (
         <div className="p-4 h-screen flex flex-col">
@@ -183,7 +183,7 @@ function Products() {
                 <select
                     id="sortOrder"
                     value={sortOrder}
-                    onChange={handleSortChange}
+                    onChange={(e) => setSortOrder(e.target.value)}
                     className="p-2 border rounded cursor-pointer w-full sm:w-auto"
                 >
                     <option value="asc">A to Z</option>
@@ -213,28 +213,47 @@ function Products() {
                                 <div className='bg-blue-600 text-white text-center p-2'>
                                     <h4 className="text-lg">{product.name}</h4>
                                     <p className="product-price">${product.finalPrice.toFixed(2)}</p>
-                                    <p className="text-sm">{product.description}</p>
-                                    <p className="text-sm">SKU: {product.sku}</p>
-                                    <p className="text-sm">GST: {product.gst}%</p>
-                                    <p className="text-sm">Category: {product.category}</p>
-                                    <div className="text-xs mt-2">
-                                        <strong>Stock:</strong> 
-                                        Covai: {product.stock.covai}, Ooty: {product.stock.ooty}, 
-                                        Kerala: {product.stock.kerala}, Chennai: {product.stock.chennai}, 
-                                        Bangalore: {product.stock.bangalore}
-                                    </div>
-                                    <div className="text-xs mt-2">
-                                        <strong>Reorder Points:</strong> 
-                                        Covai: {product.reorderPoints.covai}, Ooty: {product.reorderPoints.ooty}, 
-                                        Kerala: {product.reorderPoints.kerala}, Chennai: {product.reorderPoints.chennai}, 
-                                        Bangalore: {product.reorderPoints.bangalore}
-                                    </div>
                                 </div>
                             </div>
                         ))
                     )}
                 </div>
             </div>
+
+            {selectedProduct && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white p-4 rounded shadow-md">
+                        <h3 className="text-xl mb-2">{selectedProduct.name}</h3>
+                        <Image 
+                            src={selectedProduct.image} 
+                            alt={selectedProduct.name} 
+                            width={160} 
+                            height={130} 
+                            className="mb-2" 
+                        />
+                        <p>Price: ${selectedProduct.finalPrice.toFixed(2)}</p>
+                        <p>Select Warehouse:</p>
+                        <select
+                            value={selectedWarehouse}
+                            onChange={(e) => setSelectedWarehouse(e.target.value)}
+                            className="p-2 border rounded mb-4"
+                        >
+                            <option value="">Select Warehouse</option>
+                            {Object.keys(selectedProduct.stock).map((warehouse) => (
+                                <option key={warehouse} value={warehouse}>
+                                    {warehouse} ({selectedProduct.stock[warehouse]})
+                                </option>
+                            ))}
+                        </select>
+                        <button onClick={handleOrder} className="bg-blue-600 text-white p-2 rounded">
+                            Order
+                        </button>
+                        <button onClick={() => setSelectedProduct(null)} className="bg-gray-400 text-white p-2 rounded ml-2">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

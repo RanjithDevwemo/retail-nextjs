@@ -1675,78 +1675,12 @@ app.get('/latest-order', async (req, res) => {
     }
 });
 
-app.post('/addtobill', async (req, res) => {
-    try {
-        const { productId, productName, productPrice, category, gst,reorderPoint, sku, quantity = 1 } = req.body;
-
-        // Validate required fields
-        if (!productId || !productName || !productPrice || !category || !gst || !sku || !reorderPoint) {
-            return res.status(400).json({ success: false, message: 'Missing required fields' });
-        }
-
-        // Find the product by SKU
-        const product = await Product.findOne({ sku });
-        if (!product) {
-            return res.status(404).json({ success: false, message: 'Product not found with the given SKU' });
-        }
-
-        // Check if the requested quantity is within the available stock
-        // Get the current cart item if it exists
-        let cartItem = await Cart.findOne({ sku });
-
-        // Calculate the total quantity in the cart including the new quantity
-        const totalQuantityInCart = cartItem ? cartItem.quantity + quantity : quantity;
-
-        // Check if the total quantity in the cart is less than or equal to the product stock
-        if (totalQuantityInCart > product.stock) {
-            return res.status(400).json({ success: false, message: 'Insufficient stock' });
-        }
-
-        if (cartItem) {
-            // Product exists in the cart, update its quantity
-            cartItem.quantity = totalQuantityInCart; // Update with total quantity
-            await cartItem.save();
-            res.json({ success: true, message: 'Product quantity updated successfully', cart: cartItem });
-        } else {
-            // Create a new cart entry
-            const cart = new Cart({
-                productId: product._id, // Store productId as ObjectId from Product
-                productName,
-                productPrice,
-                category,
-                gst,
-                quantity,
-                reorderPoint,
-                sku
-            });
-            console.log(cart);
-            
-            await cart.save();
-            res.json({ success: true, message: 'Product added to bill successfully', cart });
-        }
-
-    } catch (error) {
-        console.error('Error adding product to bill:', error.message);
-        res.status(500).json({ success: false, message: 'Failed to add product to bill' });
-    }
-});
-
 // app.post('/addtobill', async (req, res) => {
 //     try {
-//         const {
-//             productId,
-//             productName,
-//             productPrice,
-//             category,
-//             gst,
-//             reorderPoint,
-//             sku,
-//             quantity = 1
-//         } = req.body;
+//         const { productId, productName, productPrice, category, gst,reorderPoint, sku, quantity = 1 } = req.body;
 
 //         // Validate required fields
-//         const requiredFields = [productId, productName, productPrice, category, gst, sku, reorderPoint];
-//         if (requiredFields.some(field => !field)) {
+//         if (!productId || !productName || !productPrice || !category || !gst || !sku || !reorderPoint) {
 //             return res.status(400).json({ success: false, message: 'Missing required fields' });
 //         }
 
@@ -1756,23 +1690,26 @@ app.post('/addtobill', async (req, res) => {
 //             return res.status(404).json({ success: false, message: 'Product not found with the given SKU' });
 //         }
 
+//         // Check if the requested quantity is within the available stock
 //         // Get the current cart item if it exists
 //         let cartItem = await Cart.findOne({ sku });
-//         const totalQuantityInCart = (cartItem ? cartItem.quantity : 0) + quantity;
 
-//         // Check stock availability
+//         // Calculate the total quantity in the cart including the new quantity
+//         const totalQuantityInCart = cartItem ? cartItem.quantity + quantity : quantity;
+
+//         // Check if the total quantity in the cart is less than or equal to the product stock
 //         if (totalQuantityInCart > product.stock) {
 //             return res.status(400).json({ success: false, message: 'Insufficient stock' });
 //         }
 
 //         if (cartItem) {
-//             // Update existing cart item
-//             cartItem.quantity = totalQuantityInCart;
+//             // Product exists in the cart, update its quantity
+//             cartItem.quantity = totalQuantityInCart; // Update with total quantity
 //             await cartItem.save();
-//             return res.json({ success: true, message: 'Product quantity updated successfully', cart: cartItem });
+//             res.json({ success: true, message: 'Product quantity updated successfully', cart: cartItem });
 //         } else {
 //             // Create a new cart entry
-//             const newCart = new Cart({
+//             const cart = new Cart({
 //                 productId: product._id, // Store productId as ObjectId from Product
 //                 productName,
 //                 productPrice,
@@ -1782,16 +1719,80 @@ app.post('/addtobill', async (req, res) => {
 //                 reorderPoint,
 //                 sku
 //             });
-
-//             await newCart.save();
-//             return res.json({ success: true, message: 'Product added to bill successfully', cart: newCart });
+//             console.log(cart);
+            
+//             await cart.save();
+//             res.json({ success: true, message: 'Product added to bill successfully', cart });
 //         }
 
 //     } catch (error) {
 //         console.error('Error adding product to bill:', error.message);
-//         return res.status(500).json({ success: false, message: 'Failed to add product to bill' });
+//         res.status(500).json({ success: false, message: 'Failed to add product to bill' });
 //     }
 // });
+
+
+app.post('/addtobill', async (req, res) => {
+    try {
+        const { productId, productName, productPrice, category, gst, reorderPoint, sku, quantity = 1, warehouse } = req.body;
+
+        // Validate required fields
+        if (!productId || !productName || !productPrice || !category || !gst || !sku || !reorderPoint || !warehouse) {
+            return res.status(400).json({ success: false, message: 'Missing required fields' });
+        }
+
+        // Find the product by SKU
+        const product = await Product.findOne({ sku });
+        if (!product) {
+            return res.status(404).json({ success: false, message: 'Product not found with the given SKU' });
+        }
+
+        // Check if the requested quantity is within the available stock for the selected warehouse
+        const stockAvailable = product.stock[warehouse] || 0;
+        const totalQuantityInCart = await Cart.findOne({ sku }) ? (await Cart.findOne({ sku })).quantity + quantity : quantity;
+
+        // Check if the total quantity in the cart is less than or equal to the product stock
+        if (totalQuantityInCart > stockAvailable) {
+            return res.status(400).json({ success: false, message: 'Insufficient stock in the selected warehouse' });
+        }
+
+        // Get the cart item if it exists
+        let cartItem = await Cart.findOne({ sku, warehouse });
+
+        if (cartItem) {
+            // Update the existing cart item
+            cartItem.quantity = totalQuantityInCart; // Update with total quantity
+            await cartItem.save();
+            res.json({ success: true, message: 'Product quantity updated successfully', cart: cartItem });
+        } else {
+            // Create a new cart entry
+            const cart = new Cart({
+                productId: product._id,
+                productName,
+                productPrice,
+                category,
+                gst,
+                quantity,
+                reorderPoint,
+                sku,
+                warehouse // Store selected warehouse
+            });
+
+            await cart.save();
+            res.json({ success: true, message: 'Product added to bill successfully', cart });
+        }
+
+        // Reduce stock from the selected warehouse
+        product.stock[warehouse] -= quantity; // Deduct quantity from stock
+        await product.save(); // Save the updated product stock
+
+    } catch (error) {
+        console.error('Error adding product to bill:', error.message);
+        res.status(500).json({ success: false, message: 'Failed to add product to bill' });
+    }
+});
+
+
 
 app.post('/goods/transfer', async (req, res) => {
     try {
