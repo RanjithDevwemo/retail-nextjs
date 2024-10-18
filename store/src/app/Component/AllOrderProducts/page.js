@@ -1,263 +1,7 @@
 
-// // // // 'use client';
-// // // // import '@/app/Component/AllOrderProducts/AllOrderProducts.css';
-// // // // import { useAppContext } from '@/app/Context';
-// // // // import Image from 'next/image';
-// // // // import { useState } from 'react';
-
-// // // // function Products() {
-// // // //     const { filteredProducts, searchTerm, handleSearchChange, billCart } = useAppContext();
-// // // //     const [sortOrder, setSortOrder] = useState('asc'); // State for sorting order
-
-// // // //     console.log(filteredProducts);
-    
-
-// // // //     const handleCardClick = (product) => {
-// // // //         if (product.stock > 0) {
-// // // //             billCart(
-// // // //                 product._id,
-// // // //                 product.name,
-// // // //                 product.finalPrice,
-// // // //                 product.category,
-// // // //                 product.gst,
-// // // //                 product.reorderPoint,
-// // // //                 product.sku
-// // // //             );
-// // // //         } else {
-// // // //             alert("Out of stock, cannot order this product");
-// // // //         }
-// // // //     };
-
-// // // //     // Function to sort products based on the selected order
-// // // //     const sortedProducts = [...filteredProducts].sort((a, b) => {
-// // // //         if (sortOrder === 'asc') {
-// // // //             return a.name.localeCompare(b.name);
-// // // //         } else if (sortOrder === 'desc') {
-// // // //             return b.name.localeCompare(a.name);
-// // // //         } else if (sortOrder === 'lowToHigh') {
-// // // //             return a.finalPrice - b.finalPrice;
-// // // //         } else if (sortOrder === 'highToLow') {
-// // // //             return b.finalPrice - a.finalPrice;
-// // // //         }
-// // // //     });
-
-// // // //     const handleSortChange = (e) => {
-// // // //         setSortOrder(e.target.value);
-// // // //     };
-
-// // // //     return (
-// // // //         <div className="p-4 h-screen flex flex-col">
-// // // //             <h1 className="text-2xl font-bold text-center mb-4">Order Products</h1>
-// // // //             <form className="mb-4">
-// // // //                 <input
-// // // //                     type="text"
-// // // //                     placeholder='Search products...'
-// // // //                     value={searchTerm}
-// // // //                     onChange={handleSearchChange}
-// // // //                     className="w-full p-2 border rounded"
-// // // //                 />
-// // // //             </form>
-// // // //             <div className="mb-4 text-end">
-// // // //                 <select
-// // // //                     id="sortOrder"
-// // // //                     value={sortOrder}
-// // // //                     onChange={handleSortChange}
-// // // //                     className="p-2 border rounded cursor-pointer w-full sm:w-auto"
-// // // //                 >
-// // // //                     <option value="asc">A to Z</option>
-// // // //                     <option value="desc">Z to A</option>
-// // // //                     <option value="lowToHigh">Low Price to High</option>
-// // // //                     <option value="highToLow">High Price to Low</option>
-// // // //                 </select>
-// // // //             </div>
-// // // //             <div className="flex-grow h-0">
-// // // //                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
-// // // //                     {sortedProducts.length === 0 ? (
-// // // //                         <p className="text-center col-span-full">No products found</p>
-// // // //                     ) : (
-// // // //                         sortedProducts.map(product => (
-// // // //                             <div
-// // // //                                 key={product._id}
-// // // //                                 className="border rounded-lg overflow-hidden cursor-pointer transform transition-transform duration-300 hover:scale-105 shadow-md"
-// // // //                                 onClick={() => handleCardClick(product)}
-// // // //                             >
-// // // //                                 <Image 
-// // // //                                     src={product.image} 
-// // // //                                     alt={product.name} 
-// // // //                                     width={160} 
-// // // //                                     height={130} 
-// // // //                                     className="w-full h-40 object-cover" 
-// // // //                                 />
-// // // //                                 <div className='bg-blue-600 text-white text-center p-2'>
-// // // //                                     <h4 className="text-lg">{product.name}</h4>
-// // // //                                     <p className="product-price">${product.finalPrice.toFixed(2)}</p>
-// // // //                                 </div>
-// // // //                             </div>
-// // // //                         ))
-// // // //                     )}
-// // // //                 </div>
-// // // //             </div>
-// // // //         </div>
-// // // //     );
-// // // // }
-
-// // // // export default Products;
-
-
-
-
-
-// // 'use client';
-// // import '@/app/Component/AllOrderProducts/AllOrderProducts.css';
-// // import { useAppContext } from '@/app/Context';
-// // import Image from 'next/image';
-// // import { useState } from 'react';
-
-// // function Products() {
-// //     const { filteredProducts, searchTerm, handleSearchChange, billCart } = useAppContext();
-// //     const [sortOrder, setSortOrder] = useState('asc'); // State for sorting order
-// //     const [warehouseFilter, setWarehouseFilter] = useState(''); // State for warehouse filter
-
-// //     const handleCardClick = (product) => {
-// //         const totalStock = Object.values(product.stock).reduce((acc, val) => acc + Number(val), 0);
-// //         if (totalStock > 0) {
-// //             billCart(
-// //                 product._id,
-// //                 product.name,
-// //                 product.finalPrice,
-// //                 product.category,
-// //                 product.gst,
-// //                 product.reorderPoints,
-// //                 product.sku
-// //             );
-// //         } else {
-// //             alert("Out of stock, cannot order this product");
-// //         }
-// //     };
-
-// //     // Function to sort products based on the selected order
-// //     const sortedProducts = [...filteredProducts].sort((a, b) => {
-// //         switch (sortOrder) {
-// //             case 'asc':
-// //                 return a.name.localeCompare(b.name);
-// //             case 'desc':
-// //                 return b.name.localeCompare(a.name);
-// //             case 'lowToHigh':
-// //                 return a.finalPrice - b.finalPrice;
-// //             case 'highToLow':
-// //                 return b.finalPrice - a.finalPrice;
-// //             default:
-// //                 return 0;
-// //         }
-// //     });
-
-// //     // Function to filter products based on the selected warehouse
-// //     const filteredProductsByWarehouse = sortedProducts.filter(product => {
-// //         if (!warehouseFilter) return true; // Show all if no warehouse is selected
-// //         return product.stock[warehouseFilter] > 0; // Only show products with stock in the selected warehouse
-// //     });
-
-// //     const handleSortChange = (e) => {
-// //         setSortOrder(e.target.value);
-// //     };
-
-// //     const handleWarehouseFilterChange = (e) => {
-// //         setWarehouseFilter(e.target.value);
-// //     };
-
-// //     return (
-// //         <div className="p-4 h-screen flex flex-col">
-// //             <h1 className="text-2xl font-bold text-center mb-4">Order Products</h1>
-// //             <form className="mb-4">
-// //                 <input
-// //                     type="text"
-// //                     placeholder='Search products...'
-// //                     value={searchTerm}
-// //                     onChange={handleSearchChange}
-// //                     className="w-full p-2 border rounded"
-// //                 />
-// //             </form>
-// //             <div className="mb-4 text-end">
-// //                 <select
-// //                     id="sortOrder"
-// //                     value={sortOrder}
-// //                     onChange={handleSortChange}
-// //                     className="p-2 border rounded cursor-pointer w-full sm:w-auto"
-// //                 >
-// //                     <option value="asc">A to Z</option>
-// //                     <option value="desc">Z to A</option>
-// //                     <option value="lowToHigh">Low Price to High</option>
-// //                     <option value="highToLow">High Price to Low</option>
-// //                 </select>
-// //             </div>
-
-// //             {/* Dropdown for warehouse filtering */}
-// //             <div className="mb-4 text-end">
-// //                 <select
-// //                     id="warehouseFilter"
-// //                     value={warehouseFilter}
-// //                     onChange={handleWarehouseFilterChange}
-// //                     className="p-2 border rounded cursor-pointer w-full sm:w-auto"
-// //                 >
-// //                     <option value="">All Warehouses</option>
-// //                     {Object.keys(filteredProducts[0]?.stock || {}).map(warehouse => (
-// //                         <option key={warehouse} value={warehouse}>
-// //                             {warehouse}
-// //                         </option>
-// //                     ))}
-// //                 </select>
-// //             </div>
-
-// //             <div className="flex-grow h-0">
-// //                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
-// //                     {filteredProductsByWarehouse.length === 0 ? (
-// //                         <p className="text-center col-span-full">No products found</p>
-// //                     ) : (
-// //                         filteredProductsByWarehouse.map(product => (
-// //                             <div
-// //                                 key={product._id}
-// //                                 className="border rounded-lg overflow-hidden cursor-pointer transform transition-transform duration-300 hover:scale-105 shadow-md"
-// //                                 onClick={() => handleCardClick(product)}
-// //                             >
-// //                                 <Image 
-// //                                     src={product.image} 
-// //                                     alt={product.name} 
-// //                                     width={160} 
-// //                                     height={130} 
-// //                                     className="w-full h-40 object-cover" 
-// //                                 />
-// //                                 <div className='bg-blue-600 text-white text-center p-2'>
-// //                                     <h4 className="text-lg">{product.name}</h4>
-// //                                     {/* Display dynamic stock value for the selected warehouse */}
-// //                                     {warehouseFilter ? (
-// //                                         <h2>Stock: {product.stock[warehouseFilter] || 0}</h2>
-// //                                     ) : (
-// //                                         <h2>Stock: {Object.values(product.stock).reduce((acc, val) => acc + Number(val), 0)}</h2>
-// //                                     )}
-// //                                     <p className="product-price">${product.finalPrice.toFixed(2)}</p>
-// //                                 </div>
-// //                             </div>
-// //                         ))
-// //                     )}
-// //                 </div>
-// //             </div>
-// //         </div>
-// //     );
-// // }
-
-// // export default Products;
-
-
-
-
-
-
-
-
-
-
 
 // 'use client';
+
 // import '@/app/Component/AllOrderProducts/AllOrderProducts.css';
 // import { useAppContext } from '@/app/Context';
 // import Image from 'next/image';
@@ -265,30 +9,30 @@
 
 // function Products() {
 //     const { filteredProducts, searchTerm, handleSearchChange, billCart } = useAppContext();
-//     const [sortOrder, setSortOrder] = useState('asc'); // State for sorting order
-//     const [warehouseFilter, setWarehouseFilter] = useState(''); // State for warehouse filter
+//     const [sortOrder, setSortOrder] = useState('asc');
+//     const [warehouseFilter, setWarehouseFilter] = useState('');
 
 //     const handleCardClick = (product) => {
-//         const stockInWarehouse = product.stock[warehouseFilter] || 0;
-//         if (stockInWarehouse > 0) {
-//             const quantity = 1; // Default quantity for each order
-//             billCart(
-//                 product._id,
-//                 product.name,
-//                 product.finalPrice,
-//                 product.category,
-//                 product.gst,
-//                 product.reorderPoints[warehouseFilter] || 0, // Use reorder point for the selected warehouse
-//                 product.sku,
-//                 quantity,
-//                 warehouseFilter // Include selected warehouse
-//             );
+//         const totalStock = Object.values(product.stock).reduce((acc, val) => acc + Number(val), 0);
+//         if (totalStock > 0) {
+//             billCart({
+                
+//                 productId: product._id,
+//                 productName: product.name,
+//                 productPrice: product.finalPrice,
+//                 category: product.category,
+//                 gst: product.gst,
+//                 reorderPoint: product.reorderPoints,
+//                 sku: product.sku,
+//                 quantity: 1, // Default quantity
+//                 warehouse: warehouseFilter
+//             });
 //         } else {
 //             alert("Out of stock, cannot order this product");
 //         }
 //     };
 
-//     // Function to sort products based on the selected order
+//     // Sorting logic
 //     const sortedProducts = [...filteredProducts].sort((a, b) => {
 //         switch (sortOrder) {
 //             case 'asc':
@@ -304,19 +48,10 @@
 //         }
 //     });
 
-//     // Function to filter products based on the selected warehouse
+//     // Warehouse filtering logic
 //     const filteredProductsByWarehouse = sortedProducts.filter(product => {
-//         if (!warehouseFilter) return true; // Show all if no warehouse is selected
-//         return product.stock[warehouseFilter] > 0; // Only show products with stock in the selected warehouse
+//         return !warehouseFilter || (product.stock && product.stock[warehouseFilter] > 0);
 //     });
-
-//     const handleSortChange = (e) => {
-//         setSortOrder(e.target.value);
-//     };
-
-//     const handleWarehouseFilterChange = (e) => {
-//         setWarehouseFilter(e.target.value);
-//     };
 
 //     return (
 //         <div className="p-4 h-screen flex flex-col">
@@ -334,7 +69,7 @@
 //                 <select
 //                     id="sortOrder"
 //                     value={sortOrder}
-//                     onChange={handleSortChange}
+//                     onChange={(e) => setSortOrder(e.target.value)}
 //                     className="p-2 border rounded cursor-pointer w-full sm:w-auto"
 //                 >
 //                     <option value="asc">A to Z</option>
@@ -343,24 +78,21 @@
 //                     <option value="highToLow">High Price to Low</option>
 //                 </select>
 //             </div>
-
-//             {/* Dropdown for warehouse filtering */}
 //             <div className="mb-4 text-end">
 //                 <select
 //                     id="warehouseFilter"
 //                     value={warehouseFilter}
-//                     onChange={handleWarehouseFilterChange}
+//                     onChange={(e) => setWarehouseFilter(e.target.value)}
 //                     className="p-2 border rounded cursor-pointer w-full sm:w-auto"
 //                 >
 //                     <option value="">All Warehouses</option>
-//                     {Object.keys(filteredProducts[0]?.stock || {}).map(warehouse => (
+//                     {filteredProducts.length > 0 && Object.keys(filteredProducts[0]?.stock || {}).map(warehouse => (
 //                         <option key={warehouse} value={warehouse}>
 //                             {warehouse}
 //                         </option>
 //                     ))}
 //                 </select>
 //             </div>
-
 //             <div className="flex-grow h-0">
 //                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
 //                     {filteredProductsByWarehouse.length === 0 ? (
@@ -381,8 +113,9 @@
 //                                 />
 //                                 <div className='bg-blue-600 text-white text-center p-2'>
 //                                     <h4 className="text-lg">{product.name}</h4>
-//                                     {/* Display dynamic stock value for the selected warehouse */}
-//                                     <h2>Stock: {warehouseFilter ? product.stock[warehouseFilter] || 0 : Object.values(product.stock).reduce((acc, val) => acc + Number(val), 0)}</h2>
+//                                     <h2>
+//                                         Stock: {warehouseFilter && product.stock ? product.stock[warehouseFilter] || 0 : product.stock ? Object.values(product.stock).reduce((acc, val) => acc + Number(val), 0) : 0}
+//                                     </h2>
 //                                     <p className="product-price">${product.finalPrice.toFixed(2)}</p>
 //                                 </div>
 //                             </div>
@@ -399,10 +132,8 @@
 
 
 
-
-
-
 'use client';
+
 import '@/app/Component/AllOrderProducts/AllOrderProducts.css';
 import { useAppContext } from '@/app/Context';
 import Image from 'next/image';
@@ -410,29 +141,42 @@ import { useState } from 'react';
 
 function Products() {
     const { filteredProducts, searchTerm, handleSearchChange, billCart } = useAppContext();
-    const [sortOrder, setSortOrder] = useState('asc'); // State for sorting order
-    const [warehouseFilter, setWarehouseFilter] = useState(''); // State for warehouse filter
+    const [sortOrder, setSortOrder] = useState('asc');
+    const [warehouseFilter, setWarehouseFilter] = useState('');
+
+    const selectedProducts = []; // Array to hold selected products
 
     const handleCardClick = (product) => {
-        const totalStock = Object.values(product.stock).reduce((acc, val) => acc + Number(val), 0);
-        if (totalStock > 0) {
-            billCart(
-                product._id,
-                product.name,
-                product.finalPrice,
-                product.category,
-                product.gst,
-                product.reorderPoints,
-                product.sku,
-                1, // Default quantity
-                warehouseFilter // Pass the selected warehouse
-            );
+        if (!warehouseFilter) {
+            alert("Please select a warehouse before ordering.");
+            return;
+        }
+
+        const stockAmount = product.stock?.[warehouseFilter] || 0;
+        if (stockAmount > 0) {
+            const productDetails = {
+                productId: product._id,
+                name: product.name,
+                price: product.finalPrice,
+                category: product.category,
+                gst: product.gst,
+                sku: product.sku,
+                quantity: 1, // Default quantity
+                warehouse: warehouseFilter
+            };
+
+            // Add product to the selectedProducts array
+            selectedProducts.push(productDetails);
+            console.log('Selected Products:', selectedProducts);
+
+            // Call the billCart function with the selected product
+            billCart(productDetails);
         } else {
-            alert("Out of stock, cannot order this product");
+            alert("Out of stock in the selected warehouse, cannot order this product");
         }
     };
 
-    // Function to sort products based on the selected order
+    // Sorting logic
     const sortedProducts = [...filteredProducts].sort((a, b) => {
         switch (sortOrder) {
             case 'asc':
@@ -448,19 +192,10 @@ function Products() {
         }
     });
 
-    // Function to filter products based on the selected warehouse
+    // Warehouse filtering logic
     const filteredProductsByWarehouse = sortedProducts.filter(product => {
-        if (!warehouseFilter) return true; // Show all if no warehouse is selected
-        return product.stock && product.stock[warehouseFilter] > 0; // Only show products with stock in the selected warehouse
+        return !warehouseFilter || (product.stock && product.stock[warehouseFilter] > 0);
     });
-
-    const handleSortChange = (e) => {
-        setSortOrder(e.target.value);
-    };
-
-    const handleWarehouseFilterChange = (e) => {
-        setWarehouseFilter(e.target.value);
-    };
 
     return (
         <div className="p-4 h-screen flex flex-col">
@@ -478,7 +213,7 @@ function Products() {
                 <select
                     id="sortOrder"
                     value={sortOrder}
-                    onChange={handleSortChange}
+                    onChange={(e) => setSortOrder(e.target.value)}
                     className="p-2 border rounded cursor-pointer w-full sm:w-auto"
                 >
                     <option value="asc">A to Z</option>
@@ -487,16 +222,14 @@ function Products() {
                     <option value="highToLow">High Price to Low</option>
                 </select>
             </div>
-
-            {/* Dropdown for warehouse filtering */}
             <div className="mb-4 text-end">
                 <select
                     id="warehouseFilter"
                     value={warehouseFilter}
-                    onChange={handleWarehouseFilterChange}
+                    onChange={(e) => setWarehouseFilter(e.target.value)}
                     className="p-2 border rounded cursor-pointer w-full sm:w-auto"
                 >
-                    <option value="">All Warehouses</option>
+                    <option value="">Select a Warehouse</option>
                     {filteredProducts.length > 0 && Object.keys(filteredProducts[0]?.stock || {}).map(warehouse => (
                         <option key={warehouse} value={warehouse}>
                             {warehouse}
@@ -504,7 +237,6 @@ function Products() {
                     ))}
                 </select>
             </div>
-
             <div className="flex-grow h-0">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
                     {filteredProductsByWarehouse.length === 0 ? (
@@ -540,9 +272,3 @@ function Products() {
 }
 
 export default Products;
-
-
-
-
-
-
