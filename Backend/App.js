@@ -1542,9 +1542,6 @@ app.get('/store/verify-token', fetchStore, (req, res) => {
 // });
 
 
-
-
-
 app.post('/order', async (req, res) => {
     try {
         const {
@@ -1574,7 +1571,7 @@ app.post('/order', async (req, res) => {
 
         // Fetch and update the stock for each product in the cart
         for (const item of items) {
-            const { productId, quantity } = item;
+            const { productId, quantity, warehouse } = item;
 
             // Find the product by ID
             const product = await Product.findById(productId);
@@ -1582,17 +1579,28 @@ app.post('/order', async (req, res) => {
                 return res.status(404).json({ success: false, message: `Product with ID ${productId} not found` });
             }
 
-            // Check if the requested quantity is available in stock
-            if (quantity > product.stock) {
-                return res.status(400).json({ success: false, message: `Insufficient stock for product with ID ${productId}. Available: ${product.stock}, Requested: ${quantity}` });
+            // Check if the requested quantity is available in the specified warehouse
+            const availableStock = product.stock[warehouse];
+            if (quantity > availableStock) {
+                return res.status(400).json({ success: false, message: `Insufficient stock for product with ID ${productId} in warehouse ${warehouse}. Available: ${availableStock}, Requested: ${quantity}` });
             }
 
-            // Update product stock
-            product.stock -= quantity;
+          
+          
+            
+            console.log("product.stock[warehouse] : ",product.stock[warehouse]," and quantity is :",quantity);
+            
+            product.stock[warehouse] -= quantity;
+
+            console.log(product.stock);
+            for (const [key, value] of Object.entries(product.stock)) {
+               console.log(`Key: ${key}, Value: ${value}`);
+           }
+
             await product.save();
 
             // Check stock level after update
-            if (product.stock < product.reorderPoint) {
+            if (product.stock[warehouse] < product.reorderPoints[warehouse]) {
                 purchasePromises.push(handleLowStock(product));
             }
 
@@ -1602,13 +1610,9 @@ app.post('/order', async (req, res) => {
                 productName: product.name,
                 productPrice: product.price,
                 quantity,
-                reorderPoint: product.reorderPoint // Ensure reorderPoint is included
+                reorderPoint: product.reorderPoints[warehouse] 
             });
         }
-
-        // Execute all purchase updates in parallel
-        await Promise.all(purchasePromises);
-
         // Create and save new order
         const order = new Order({
             items: updatedItems,
@@ -1632,31 +1636,118 @@ app.post('/order', async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to create order' });
     }
 });
-async function handleLowStock(product) {
-    const vendorId = product.ventorId; // Ensure this matches your Product schema
-    const foundVentor = await Ventor.findOne({ id: vendorId });
-
-    if (foundVentor) {
-        console.log(`Ventor Name: ${foundVentor.name}`);
-        const message = `${product.name} stock is low (current stock: ${product.stock}). Ventor Name: ${foundVentor.name}, Ventor ID: ${vendorId}`;
-
-        const purchase = new Purchase({
-            productId: product._id,
-            productname: product.name, // Ensure this matches the Purchase schema
-            vendorId, // Correct field name
-            VendorName: foundVentor.name, // Ensure this matches the Purchase schema
-            message: message,
-        });
-
-        await purchase.save();
-    } else {
-        console.log(`Ventor with ID ${vendorId} not found.`);
-    }
-}
 
 
 
 
+// app.post('/order', async (req, res) => {
+//     try {
+//         const {
+//             items,
+//             totalValue,
+//             totalQuantity,
+//             customerName,
+//             customerPhoneNumber,
+//             paymentType,
+//             upiId,
+//             cardNo,
+//         } = req.body;
+
+//         // Basic validation
+//         if (!items || !Array.isArray(items) || items.length === 0) {
+//             return res.status(400).json({ success: false, message: 'Items are required and must be a non-empty array' });
+//         }
+//         if (totalValue === undefined || totalQuantity === undefined) {
+//             return res.status(400).json({ success: false, message: 'Total value and total quantity are required' });
+//         }
+//         if (!customerName || !customerPhoneNumber) {
+//             return res.status(400).json({ success: false, message: 'Customer name and phone number are required' });
+//         }
+
+//         const updatedItems = [];
+//         const purchasePromises = [];
+
+//         // Fetch and update the stock for each product in the cart
+//         for (const item of items) {
+//             const { productId, quantity } = item;
+
+//             // Find the product by ID
+//             const product = await Product.findById(productId);
+//             if (!product) {
+//                 return res.status(404).json({ success: false, message: `Product with ID ${productId} not found` });
+//             }
+
+//             // Check if the requested quantity is available in stock
+//             if (quantity > product.stock) {
+//                 return res.status(400).json({ success: false, message: `Insufficient stock for product with ID ${productId}. Available: ${product.stock}, Requested: ${quantity}` });
+//             }
+
+//             // Update product stock
+//             product.stock -= quantity;
+//             await product.save();
+
+//             // Check stock level after update
+//             if (product.stock < product.reorderPoint) {
+//                 purchasePromises.push(handleLowStock(product));
+//             }
+
+//             // Add product details to the updated items array, including reorderPoint
+//             updatedItems.push({
+//                 productId: product._id,
+//                 productName: product.name,
+//                 productPrice: product.price,
+//                 quantity,
+//                 reorderPoint: product.reorderPoint // Ensure reorderPoint is included
+//             });
+//         }
+
+//         // Execute all purchase updates in parallel
+//         await Promise.all(purchasePromises);
+
+//         // Create and save new order
+//         const order = new Order({
+//             items: updatedItems,
+//             totalValue,
+//             totalQuantity,
+//             customerName,
+//             customerPhoneNumber,
+//             paymentType,
+//             upiId: paymentType === 'upiId' ? upiId : undefined,
+//             cardNo: paymentType === 'cardNo' ? cardNo : undefined,
+//         });
+
+//         await order.save();
+
+//         // Clear the cart after order creation
+//         await Cart.deleteMany({});
+
+//         res.json({ success: true, message: 'Order created successfully', order });
+//     } catch (error) {
+//         console.error('Error creating order:', error.message);
+//         res.status(500).json({ success: false, message: 'Failed to create order' });
+//     }
+// });
+// async function handleLowStock(product) {
+//     const vendorId = product.ventorId; // Ensure this matches your Product schema
+//     const foundVentor = await Ventor.findOne({ id: vendorId });
+
+//     if (foundVentor) {
+//         console.log(`Ventor Name: ${foundVentor.name}`);
+//         const message = `${product.name} stock is low (current stock: ${product.stock}). Ventor Name: ${foundVentor.name}, Ventor ID: ${vendorId}`;
+
+//         const purchase = new Purchase({
+//             productId: product._id,
+//             productname: product.name, // Ensure this matches the Purchase schema
+//             vendorId, // Correct field name
+//             VendorName: foundVentor.name, // Ensure this matches the Purchase schema
+//             message: message,
+//         });
+
+//         await purchase.save();
+//     } else {
+//         console.log(`Ventor with ID ${vendorId} not found.`);
+//     }
+// }
 
 
 app.get('/latest-order', async (req, res) => {
@@ -1832,87 +1923,87 @@ app.post('/addtobill', async (req, res) => {
 
 
 
-app.post('/addtobill', async (req, res) => {
-    try {
-        const items = req.body; // Expecting an array of items
-        const cartItems = [];
+// app.post('/addtobill', async (req, res) => {
+//     try {
+//         const items = req.body; // Expecting an array of items
+//         const cartItems = [];
 
-        // Validate input
-        if (!Array.isArray(items) || items.length === 0) {
-            return res.status(400).json({ success: false, message: 'Invalid input. Must provide an array of items.' });
-        }
+//         // Validate input
+//         if (!Array.isArray(items) || items.length === 0) {
+//             return res.status(400).json({ success: false, message: 'Invalid input. Must provide an array of items.' });
+//         }
 
-        for (const item of items) {
-            const {
-                productId,
-                productName,
-                productPrice,
-                category,
-                gst,
-                reorderPoint,
-                sku,
-                quantity = 1,
-                warehouse
-            } = item;
+//         for (const item of items) {
+//             const {
+//                 productId,
+//                 productName,
+//                 productPrice,
+//                 category,
+//                 gst,
+//                 reorderPoint,
+//                 sku,
+//                 quantity = 1,
+//                 warehouse
+//             } = item;
 
-            // Validate required fields for each item
-            if (!productId || !productName || !productPrice || !category || !gst || !sku || !reorderPoint || !warehouse) {
-                return res.status(400).json({ success: false, message: 'Missing required fields in item' });
-            }
+//             // Validate required fields for each item
+//             if (!productId || !productName || !productPrice || !category || !gst || !sku || !reorderPoint || !warehouse) {
+//                 return res.status(400).json({ success: false, message: 'Missing required fields in item' });
+//             }
 
-            // Find the product by SKU
-            const product = await Product.findOne({ sku });
-            if (!product) {
-                return res.status(404).json({ success: false, message: `Product not found with SKU: ${sku}` });
-            }
+//             // Find the product by SKU
+//             const product = await Product.findOne({ sku });
+//             if (!product) {
+//                 return res.status(404).json({ success: false, message: `Product not found with SKU: ${sku}` });
+//             }
 
-            // Check available stock for the specified warehouse
-            const availableStock = product.stock[warehouse] || 0;
+//             // Check available stock for the specified warehouse
+//             const availableStock = product.stock[warehouse] || 0;
 
-            // Ensure the requested quantity is less than or equal to the available stock
-            if (quantity > availableStock) {
-                return res.status(400).json({ success: false, message: `Insufficient stock for ${productName} in ${warehouse}` });
-            }
+//             // Ensure the requested quantity is less than or equal to the available stock
+//             if (quantity > availableStock) {
+//                 return res.status(400).json({ success: false, message: `Insufficient stock for ${productName} in ${warehouse}` });
+//             }
 
-            // Check if the cart item already exists
-            let cartItem = await Cart.findOne({ sku, warehouse });
+//             // Check if the cart item already exists
+//             let cartItem = await Cart.findOne({ sku, warehouse });
 
-            if (cartItem) {
-                // Check stock availability before updating the cart item
-                if (availableStock >= cartItem.quantity + quantity) {
-                    // Product exists in the cart, update its quantity
-                    cartItem.quantity += quantity; // Update with new quantity
-                    await cartItem.save();
-                } else {
-                    return res.status(400).json({ success: false, message: `Insufficient stock for ${productName} in ${warehouse}` });
-                }
-            } else {
-                // Create a new cart entry
-                cartItem = new Cart({
-                    productId: product._id,
-                    productName,
-                    productPrice,
-                    category,
-                    gst,
-                    quantity,
-                    reorderPoint,
-                    sku,
-                    warehouse
-                });
-                await cartItem.save();
-            }
+//             if (cartItem) {
+//                 // Check stock availability before updating the cart item
+//                 if (availableStock >= cartItem.quantity + quantity) {
+//                     // Product exists in the cart, update its quantity
+//                     cartItem.quantity += quantity; // Update with new quantity
+//                     await cartItem.save();
+//                 } else {
+//                     return res.status(400).json({ success: false, message: `Insufficient stock for ${productName} in ${warehouse}` });
+//                 }
+//             } else {
+//                 // Create a new cart entry
+//                 cartItem = new Cart({
+//                     productId: product._id,
+//                     productName,
+//                     productPrice,
+//                     category,
+//                     gst,
+//                     quantity,
+//                     reorderPoint,
+//                     sku,
+//                     warehouse
+//                 });
+//                 await cartItem.save();
+//             }
 
-            // Store cart item for response
-            cartItems.push(cartItem);
-        }
+//             // Store cart item for response
+//             cartItems.push(cartItem);
+//         }
 
-        res.json({ success: true, message: 'Products added to bill successfully', cart: cartItems });
+//         res.json({ success: true, message: 'Products added to bill successfully', cart: cartItems });
 
-    } catch (error) {
-        console.error('Error adding products to bill:', error.message);
-        res.status(500).json({ success: false, message: 'Failed to add products to bill' });
-    }
-});
+//     } catch (error) {
+//         console.error('Error adding products to bill:', error.message);
+//         res.status(500).json({ success: false, message: 'Failed to add products to bill' });
+//     }
+// });
 
 
 app.post('/goods/transfer', async (req, res) => {
@@ -2178,17 +2269,71 @@ app.get('/allproducts', async (req, res) => {
     }
 });
 
-//fiterin top 5 low stock products
+// //fiterin top 5 low stock products
+
+
+// app.get('/topfive/lowstock/products', async (req, res) => {
+//     try {
+//         const allProducts = await Product.find({}); 
+
+//         // Initialize an array to hold products with their lowest stock across warehouses
+//         const lowStockProducts = [];
+
+//         // Iterate through each product
+//         allProducts.forEach(product => {
+//             const productData = product.toObject(); // Convert Mongoose document to a plain object
+
+//             // Find the minimum stock value across all warehouses
+//             const minStock = Math.min(...Object.values(productData.stock));
+
+//             // Push the product with its lowest stock value
+//             lowStockProducts.push({
+//                 ...productData,
+//                 minStock // Add the minimum stock value to the product data
+//             });
+//         });
+
+//         // Sort the products by minimum stock in ascending order and get the top 5
+//         const topLowStockProducts = lowStockProducts
+//             .sort((a, b) => a.minStock - b.minStock)
+//             .slice(0, 5);
+
+//         res.status(200).json({ success: true, products: topLowStockProducts });
+//     } catch (error) {
+//         console.error('Error fetching all products:', error.message);
+//         res.status(500).json({ success: false, message: 'Failed to fetch products' });
+//     }
+// });
+
+
 app.get('/topfive/lowstock/products', async (req, res) => {
     try {
-        const allProducts = await Product.find({ available: true }); // Fetch only available products
-        
-        // Filter top 5 low stock products
-        const lowStockProducts = allProducts
-            .sort((a, b) => a.stock - b.stock) // Sort by stock in ascending order
-            .slice(0, 5); // Get the top 5
+        const allProducts = await Product.find({});
 
-        res.status(200).json({ success: true, products: lowStockProducts });
+        // Organize products by warehouse
+        const warehouseProducts = {};
+
+        allProducts.forEach(product => {
+            for (const warehouse in product.stock) {
+                if (!warehouseProducts[warehouse]) {
+                    warehouseProducts[warehouse] = [];
+                }
+                warehouseProducts[warehouse].push({
+                    ...product.toObject(),
+                    stock: product.stock[warehouse], // Keep stock for this warehouse
+                });
+            }
+        });
+
+        // Get top 5 low stock products for each warehouse
+        const topLowStockProducts = {};
+        for (const warehouse in warehouseProducts) {
+            topLowStockProducts[warehouse] = warehouseProducts[warehouse]
+                .sort((a, b) => a.stock - b.stock) // Sort by stock in ascending order
+                .slice(0, 5); // Get the top 5
+        }
+
+        res.status(200).json({ success: true, products: topLowStockProducts });
     } catch (error) {
         console.error('Error fetching all products:', error.message);
         res.status(500).json({ success: false, message: 'Failed to fetch products' });
