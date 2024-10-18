@@ -71,6 +71,7 @@ export function AppWrapper({ children }) {
         fetchProducts();
     }, []);
 
+
     // Filter products based on search term
     useEffect(() => {
         const filtered = searchTerm
@@ -80,6 +81,7 @@ export function AppWrapper({ children }) {
             : products;
         setFilteredProducts(filtered);
     }, [searchTerm, products]);
+
 
     // Fetch cart items
     const fetchCartItems = async () => {
@@ -147,25 +149,47 @@ export function AppWrapper({ children }) {
         setSearchTerm(event.target.value);
     };
 
-    // Add product to the bill
-    const billCart = async (productId, productName, productPrice, category, gst, reorderPoint, sku) => {
-        try {
-            const response = await axios.post('http://localhost:4000/addtobill', {
-                productId,
-                productName,
-                productPrice,
-                category,
-                gst,
-                reorderPoint,
-                sku
-            });
-            console.log('Add to bill response:', response.data);
-            fetchCartItems(); // Refresh cart items after adding
-        } catch (error) {
-            console.error('Error adding to bill:', error.message);
-        }
-    };
+    // // Add product to the bill
+    // const billCart = async (productId, productName, productPrice, category, gst, reorderPoint, sku) => {
+    //     try {
+    //         const response = await axios.post('http://localhost:4000/addtobill', {
+    //             productId,
+    //             productName,
+    //             productPrice,
+    //             category,
+    //             gst,
+    //             reorderPoint,
+    //             sku
+    //         });
+    //         console.log('Add to bill response:', response.data);
+    //         fetchCartItems(); // Refresh cart items after adding
+    //     } catch (error) {
+    //         console.error('Error adding to bill:', error.message);
+    //     }
+    // };
     
+
+    // Context function to add product to the bill
+const billCart = async (productId, productName, productPrice, category, gst, reorderPoint, sku, quantity, warehouse) => {
+    try {
+        const response = await axios.post('http://localhost:4000/addtobill', [{
+            productId,
+            productName,
+            productPrice,
+            category,
+            gst,
+            reorderPoint,
+            sku,
+            quantity,
+            warehouse
+        }]);
+        console.log('Add to bill response:', response.data);
+        fetchCartItems(); // Refresh cart items after adding
+    } catch (error) {
+        console.error('Error adding to bill:', error.message);
+    }
+};
+
 
     return (
         <AppContext.Provider value={{

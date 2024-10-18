@@ -1677,118 +1677,228 @@ app.get('/latest-order', async (req, res) => {
 
 // app.post('/addtobill', async (req, res) => {
 //     try {
-//         const { productId, productName, productPrice, category, gst,reorderPoint, sku, quantity = 1 } = req.body;
+//         const items = req.body; // Expecting an array of items
+//         const cartItems = [];
 
-//         // Validate required fields
-//         if (!productId || !productName || !productPrice || !category || !gst || !sku || !reorderPoint) {
-//             return res.status(400).json({ success: false, message: 'Missing required fields' });
+//         // Validate input
+//         if (!Array.isArray(items) || items.length === 0) {
+//             return res.status(400).json({ success: false, message: 'Invalid input. Must provide an array of items.' });
 //         }
 
-//         // Find the product by SKU
-//         const product = await Product.findOne({ sku });
-//         if (!product) {
-//             return res.status(404).json({ success: false, message: 'Product not found with the given SKU' });
+//         for (const item of items) {
+//             const { productId, productName, productPrice, category, gst, reorderPoint, sku, quantity = 1, warehouse } = item;
+
+//             // Validate required fields for each item
+//             if (!productId || !productName || !productPrice || !category || !gst || !sku || !reorderPoint || !warehouse) {
+//                 return res.status(400).json({ success: false, message: 'Missing required fields in item' });
+//             }
+
+//             // Find the product by SKU
+//             const product = await Product.findOne({ sku });
+//             if (!product) {
+//                 return res.status(404).json({ success: false, message: `Product not found with SKU: ${sku}` });
+//             }
+
+//             // Check available stock for the specified warehouse
+//             const availableStock = product.stock[warehouse] || 0;
+//             if (quantity > availableStock) {
+//                 return res.status(400).json({ success: false, message: `Insufficient stock for ${productName} in ${warehouse}` });
+//             }
+
+//             // Check if the cart item already exists
+//             let cartItem = await Cart.findOne({ sku, warehouse });
+
+//             if (cartItem) {
+//                 // Product exists in the cart, update its quantity
+//                 cartItem.quantity += quantity; // Update with new quantity
+//                 await cartItem.save();
+//             } else {
+//                 // Create a new cart entry
+//                 cartItem = new Cart({
+//                     productId: product._id,
+//                     productName,
+//                     productPrice,
+//                     category,
+//                     gst,
+//                     quantity,
+//                     reorderPoint,
+//                     sku,
+//                     warehouse
+//                 });
+//                 await cartItem.save();
+//             }
+
+//             // Store cart item for response
+//             cartItems.push(cartItem);
 //         }
 
-//         // Check if the requested quantity is within the available stock
-//         // Get the current cart item if it exists
-//         let cartItem = await Cart.findOne({ sku });
-
-//         // Calculate the total quantity in the cart including the new quantity
-//         const totalQuantityInCart = cartItem ? cartItem.quantity + quantity : quantity;
-
-//         // Check if the total quantity in the cart is less than or equal to the product stock
-//         if (totalQuantityInCart > product.stock) {
-//             return res.status(400).json({ success: false, message: 'Insufficient stock' });
-//         }
-
-//         if (cartItem) {
-//             // Product exists in the cart, update its quantity
-//             cartItem.quantity = totalQuantityInCart; // Update with total quantity
-//             await cartItem.save();
-//             res.json({ success: true, message: 'Product quantity updated successfully', cart: cartItem });
-//         } else {
-//             // Create a new cart entry
-//             const cart = new Cart({
-//                 productId: product._id, // Store productId as ObjectId from Product
-//                 productName,
-//                 productPrice,
-//                 category,
-//                 gst,
-//                 quantity,
-//                 reorderPoint,
-//                 sku
-//             });
-//             console.log(cart);
-            
-//             await cart.save();
-//             res.json({ success: true, message: 'Product added to bill successfully', cart });
-//         }
+//         res.json({ success: true, message: 'Products added to bill successfully', cart: cartItems });
 
 //     } catch (error) {
-//         console.error('Error adding product to bill:', error.message);
-//         res.status(500).json({ success: false, message: 'Failed to add product to bill' });
+//         console.error('Error adding products to bill:', error.message);
+//         res.status(500).json({ success: false, message: 'Failed to add products to bill' });
 //     }
 // });
 
 
+
+
+///
+
+
+// app.post('/addtobill', async (req, res) => {
+//     try {
+//         const items = req.body; // Expecting an array of items
+//         const cartItems = [];
+
+//         // Validate input
+//         if (!Array.isArray(items) || items.length === 0) {
+//             return res.status(400).json({ success: false, message: 'Invalid input. Must provide an array of items.' });
+//         }
+
+//         for (const item of items) {
+//             const { productId, productName, productPrice, category, gst, reorderPoint, sku, quantity = 1, warehouse } = item;
+
+//             // Validate required fields for each item
+//             if (!productId || !productName || !productPrice || !category || !gst || !sku || !reorderPoint || !warehouse) {
+//                 return res.status(400).json({ success: false, message: 'Missing required fields in item' });
+//             }
+
+//             // Find the product by SKU
+//             const product = await Product.findOne({ sku });
+//             if (!product) {
+//                 return res.status(404).json({ success: false, message: `Product not found with SKU: ${sku}` });
+//             }
+
+//             // Check available stock for the specified warehouse
+//             const availableStock = product.stock[warehouse] || 0;
+
+//             // Ensure the requested quantity is less than or equal to the available stock
+//             if (quantity > availableStock) {
+//                 return res.status(400).json({ success: false, message: `Insufficient stock for ${productName} in ${warehouse}` });
+//             }
+
+//             // Check if the cart item already exists
+//             let cartItem = await Cart.findOne({ sku, warehouse });
+//             let productStock=await Product.findOne({sku,wareHouse});
+//             if (cartItem) {
+//                 console.log("Stock Value is : ",productStock.stock);
+                
+//                 console.log("cartItem.quantity : ",cartItem.quantity," : quantity : ",quantity);
+//                 if(productStock.stock>=cartItem.quantity+quantity){
+//                 // Product exists in the cart, update its quantity
+//                 cartItem.quantity += quantity; // Update with new quantity
+//                 await cartItem.save();
+//                 }
+//             } else {
+//                 // Create a new cart entry
+//                 cartItem = new Cart({
+//                     productId: product._id,
+//                     productName,
+//                     productPrice,
+//                     category,
+//                     gst,
+//                     quantity,
+//                     reorderPoint,
+//                     sku,
+//                     warehouse
+//                 });
+//                 await cartItem.save();
+//             }
+
+//             // Store cart item for response
+//             cartItems.push(cartItem);
+//         }
+
+//         res.json({ success: true, message: 'Products added to bill successfully', cart: cartItems });
+
+//     } catch (error) {
+//         console.error('Error adding products to bill:', error.message);
+//         res.status(500).json({ success: false, message: 'Failed to add products to bill' });
+//     }
+// });
+
+
+
 app.post('/addtobill', async (req, res) => {
     try {
-        const { productId, productName, productPrice, category, gst, reorderPoint, sku, quantity = 1, warehouse } = req.body;
+        const items = req.body; // Expecting an array of items
+        const cartItems = [];
 
-        // Validate required fields
-        if (!productId || !productName || !productPrice || !category || !gst || !sku || !reorderPoint || !warehouse) {
-            return res.status(400).json({ success: false, message: 'Missing required fields' });
+        // Validate input
+        if (!Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({ success: false, message: 'Invalid input. Must provide an array of items.' });
         }
 
-        // Find the product by SKU
-        const product = await Product.findOne({ sku });
-        if (!product) {
-            return res.status(404).json({ success: false, message: 'Product not found with the given SKU' });
-        }
-
-        // Check if the requested quantity is within the available stock for the selected warehouse
-        const stockAvailable = product.stock[warehouse] || 0;
-        const totalQuantityInCart = await Cart.findOne({ sku }) ? (await Cart.findOne({ sku })).quantity + quantity : quantity;
-
-        // Check if the total quantity in the cart is less than or equal to the product stock
-        if (totalQuantityInCart > stockAvailable) {
-            return res.status(400).json({ success: false, message: 'Insufficient stock in the selected warehouse' });
-        }
-
-        // Get the cart item if it exists
-        let cartItem = await Cart.findOne({ sku, warehouse });
-
-        if (cartItem) {
-            // Update the existing cart item
-            cartItem.quantity = totalQuantityInCart; // Update with total quantity
-            await cartItem.save();
-            res.json({ success: true, message: 'Product quantity updated successfully', cart: cartItem });
-        } else {
-            // Create a new cart entry
-            const cart = new Cart({
-                productId: product._id,
+        for (const item of items) {
+            const {
+                productId,
                 productName,
                 productPrice,
                 category,
                 gst,
-                quantity,
                 reorderPoint,
                 sku,
-                warehouse // Store selected warehouse
-            });
+                quantity = 1,
+                warehouse
+            } = item;
 
-            await cart.save();
-            res.json({ success: true, message: 'Product added to bill successfully', cart });
+            // Validate required fields for each item
+            if (!productId || !productName || !productPrice || !category || !gst || !sku || !reorderPoint || !warehouse) {
+                return res.status(400).json({ success: false, message: 'Missing required fields in item' });
+            }
+
+            // Find the product by SKU
+            const product = await Product.findOne({ sku });
+            if (!product) {
+                return res.status(404).json({ success: false, message: `Product not found with SKU: ${sku}` });
+            }
+
+            // Check available stock for the specified warehouse
+            const availableStock = product.stock[warehouse] || 0;
+
+            // Ensure the requested quantity is less than or equal to the available stock
+            if (quantity > availableStock) {
+                return res.status(400).json({ success: false, message: `Insufficient stock for ${productName} in ${warehouse}` });
+            }
+
+            // Check if the cart item already exists
+            let cartItem = await Cart.findOne({ sku, warehouse });
+
+            if (cartItem) {
+                // Check stock availability before updating the cart item
+                if (availableStock >= cartItem.quantity + quantity) {
+                    // Product exists in the cart, update its quantity
+                    cartItem.quantity += quantity; // Update with new quantity
+                    await cartItem.save();
+                } else {
+                    return res.status(400).json({ success: false, message: `Insufficient stock for ${productName} in ${warehouse}` });
+                }
+            } else {
+                // Create a new cart entry
+                cartItem = new Cart({
+                    productId: product._id,
+                    productName,
+                    productPrice,
+                    category,
+                    gst,
+                    quantity,
+                    reorderPoint,
+                    sku,
+                    warehouse
+                });
+                await cartItem.save();
+            }
+
+            // Store cart item for response
+            cartItems.push(cartItem);
         }
 
-        // Reduce stock from the selected warehouse
-        product.stock[warehouse] -= quantity; // Deduct quantity from stock
-        await product.save(); // Save the updated product stock
+        res.json({ success: true, message: 'Products added to bill successfully', cart: cartItems });
 
     } catch (error) {
-        console.error('Error adding product to bill:', error.message);
-        res.status(500).json({ success: false, message: 'Failed to add product to bill' });
+        console.error('Error adding products to bill:', error.message);
+        res.status(500).json({ success: false, message: 'Failed to add products to bill' });
     }
 });
 
