@@ -243,4 +243,3 @@ function Billcart() {
 }
 
 export default Billcart;
-

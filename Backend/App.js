@@ -1593,7 +1593,7 @@ app.post('/order', async (req, res) => {
         const updatedItems = [];
         const purchasePromises = [];
 
-        // Fetch and update the stock for each product in the cart
+        // Process each item in the order
         for (const item of items) {
             const { productId, quantity, warehouse } = item;
 
@@ -1603,40 +1603,40 @@ app.post('/order', async (req, res) => {
                 return res.status(404).json({ success: false, message: `Product with ID ${productId} not found` });
             }
 
-            // Check if the requested quantity is available in the specified warehouse
-            const availableStock = product.stock[warehouse];
-            if (quantity > availableStock) {
-                return res.status(400).json({ success: false, message: `Insufficient stock for product with ID ${productId} in warehouse ${warehouse}. Available: ${availableStock}, Requested: ${quantity}` });
+            // Check stock in the specified warehouse
+            const warehouseStock = product.stock[warehouse] || 0;
+            if (quantity > warehouseStock) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Insufficient stock for product with ID ${productId} in warehouse ${warehouse}. Available: ${warehouseStock}, Requested: ${quantity}`
+                });
             }
 
-          
-          
-            
-            console.log("product.stock[warehouse] : ",product.stock[warehouse]," and quantity is :",quantity);
-            
-            product.stock[warehouse] -= quantity;
-
-            console.log(product.stock);
-            for (const [key, value] of Object.entries(product.stock)) {
-               console.log(`Key: ${key}, Value: ${value}`);
-           }
-
-            await product.save();
+            // Update product stock
+            const updatedStock = { ...product.stock }; // Create a copy of the stock object
+            updatedStock[warehouse] -= quantity; // Update the specific warehouse stock
+            product.stock = updatedStock; // Assign the updated stock back to the product
+            await product.save(); // Save the product to the database
 
             // Check stock level after update
-            if (product.stock[warehouse] < product.reorderPoints[warehouse]) {
+            const reorderPoint = product.reorderPoints[warehouse] || 0;
+            if (updatedStock[warehouse] < reorderPoint) {
                 purchasePromises.push(handleLowStock(product));
             }
 
-            // Add product details to the updated items array, including reorderPoint
+            // Add product details to the updated items array
             updatedItems.push({
                 productId: product._id,
                 productName: product.name,
                 productPrice: product.price,
                 quantity,
-                reorderPoint: product.reorderPoints[warehouse] 
+                reorderPoint // Ensure reorderPoint is included
             });
         }
+
+        // Execute all purchase updates in parallel
+        await Promise.all(purchasePromises);
+
         // Create and save new order
         const order = new Order({
             items: updatedItems,
@@ -1660,6 +1660,124 @@ app.post('/order', async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to create order' });
     }
 });
+
+async function handleLowStock(product) {
+    const vendorId = product.ventorId; // Ensure this matches your Product schema
+    const foundVendor = await Vendor.findOne({ id: vendorId });
+
+    if (foundVendor) {
+        const message = `${product.name} stock is low (current stock: ${product.stock}). Vendor Name: ${foundVendor.name}, Vendor ID: ${vendorId}`;
+        
+        const purchase = new Purchase({
+            productId: product._id,
+            productName: product.name,
+            vendorId,
+            vendorName: foundVendor.name,
+            message: message,
+        });
+
+        await purchase.save();
+    } else {
+        console.log(`Vendor with ID ${vendorId} not found.`);
+    }
+}
+
+
+
+// app.post('/order', async (req, res) => {
+//     try {
+//         const {
+//             items,
+//             totalValue,
+//             totalQuantity,
+//             customerName,
+//             customerPhoneNumber,
+//             paymentType,
+//             upiId,
+//             cardNo,
+//         } = req.body;
+
+//         // Basic validation
+//         if (!items || !Array.isArray(items) || items.length === 0) {
+//             return res.status(400).json({ success: false, message: 'Items are required and must be a non-empty array' });
+//         }
+//         if (totalValue === undefined || totalQuantity === undefined) {
+//             return res.status(400).json({ success: false, message: 'Total value and total quantity are required' });
+//         }
+//         if (!customerName || !customerPhoneNumber) {
+//             return res.status(400).json({ success: false, message: 'Customer name and phone number are required' });
+//         }
+
+//         const updatedItems = [];
+//         const purchasePromises = [];
+
+//         // Fetch and update the stock for each product in the cart
+//         for (const item of items) {
+//             const { productId, quantity, warehouse } = item;
+
+//             // Find the product by ID
+//             const product = await Product.findById(productId);
+//             if (!product) {
+//                 return res.status(404).json({ success: false, message: `Product with ID ${productId} not found` });
+//             }
+
+//             // Check if the requested quantity is available in the specified warehouse
+//             const availableStock = product.stock[warehouse];
+//             if (quantity > availableStock) {
+//                 return res.status(400).json({ success: false, message: `Insufficient stock for product with ID ${productId} in warehouse ${warehouse}. Available: ${availableStock}, Requested: ${quantity}` });
+//             }
+
+          
+          
+            
+//             console.log("product.stock[warehouse] : ",product.stock[warehouse]," and quantity is :",quantity);
+            
+//             product.stock[warehouse] -= quantity;
+
+//             console.log(product.stock);
+//             for (const [key, value] of Object.entries(product.stock)) {
+//                console.log(`Key: ${key}, Value: ${value}`);
+//            }
+
+//             await product.save();
+
+//             // Check stock level after update
+//             if (product.stock[warehouse] < product.reorderPoints[warehouse]) {
+//                 purchasePromises.push(handleLowStock(product));
+//             }
+
+//             // Add product details to the updated items array, including reorderPoint
+//             updatedItems.push({
+//                 productId: product._id,
+//                 productName: product.name,
+//                 productPrice: product.price,
+//                 quantity,
+//                 reorderPoint: product.reorderPoints[warehouse] 
+//             });
+//         }
+//         // Create and save new order
+//         const order = new Order({
+//             items: updatedItems,
+//             totalValue,
+//             totalQuantity,
+//             customerName,
+//             customerPhoneNumber,
+//             paymentType,
+//             upiId: paymentType === 'upiId' ? upiId : undefined,
+//             cardNo: paymentType === 'cardNo' ? cardNo : undefined,
+//         });
+
+//         await order.save();
+
+//         // Clear the cart after order creation
+//         await Cart.deleteMany({});
+
+//         res.json({ success: true, message: 'Order created successfully', order });
+//     } catch (error) {
+//         console.error('Error creating order:', error.message);
+//         res.status(500).json({ success: false, message: 'Failed to create order' });
+//     }
+// });
 
 app.get('/latest-order', async (req, res) => {
     try {

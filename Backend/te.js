@@ -1,140 +1,208 @@
-[
-    {
-      "_id": "670fb8df57974eaa8bd8d3a2",
-      "name": "Sample Product update",
-      "image": "http://localhost:4000/images/product_1725967083025.jpg",
-      "category": "electronics",
-      "price": 100,
-      "sku": "SKU12345wewq",
-      "gst": 18,
-      "description": "A great product for testing.",
-      "stock": {
-        "covai": 50,
-        "ooty": 30,
-        "kerala": 20,
-        "chennai": 10,
-        "bangalore": 15
-      },
-      "ventorId": 123,
-      "reorderPoints": {
-        "covai": 10,
-        "ooty": 5,
-        "kerala": 3,
-        "chennai": 2,
-        "bangalore": 4
-      },
-      "finalPrice": 118,
-      "totalStockValue": 125,
-      "createdAt": "2024-10-16T13:00:15.689Z",
-      "updatedAt": "2024-10-18T05:37:49.438Z",
-      "__v": 0
-    },
-    {
-      "_id": "670fba7757974eaa8bd8d3b0",
-      "name": "Sample Product1",
-      "image": "http://localhost:4000/images/product_1727264306665.jpg",
-      "category": "electronicsww223",
-      "price": 14310,
-      "sku": "SKU12345q",
-      "gst": 18,
-      "description": "A great product for testing.",
-      "stock": {
-        "covai": 50,
-        "ooty": 30,
-        "kerala": 20,
-        "chennai": 10
-      },
-      "ventorId": 12543,
-      "reorderPoints": {
-        "covai": 10,
-        "ooty": 5,
-        "kerala": 3,
-        "chennai": 2
-      },
-      "finalPrice": 16885.8,
-      "totalStockValue": 1502550,
-      "createdAt": "2024-10-16T13:07:03.389Z",
-      "updatedAt": "2024-10-18T05:37:49.604Z",
-      "__v": 0
-    },
-    {
-      "_id": "670fbad457974eaa8bd8d3b9",
-      "name": "Pencil",
-      "image": "http://localhost:4000/images/product_1729249031790.jpg",
-      "category": "pen",
-      "price": 100,
-      "sku": "SKU1",
-      "gst": 18,
-      "description": "A great product for testing.",
-      "stock": {
-        "covai": 50,
-        "ooty": 30,
-        "kerala": "10",
-        "undefined": "10"
-      },
-      "ventorId": 12543,
-      "reorderPoints": {
-        "covai": 10,
-        "ooty": 5,
-        "kerala": 3,
-        "undefined": "5"
-      },
-      "finalPrice": 118,
-      "totalStockValue": 100,
-      "createdAt": "2024-10-16T13:08:36.761Z",
-      "updatedAt": "2024-10-17T05:16:13.017Z",
-      "__v": 0
-    },
-    {
-      "_id": "67123f074c45c334acc0cd27",
-      "name": "note book",
-      "image": "http://localhost:4000/images/product_1729249110932.jpg",
-      "category": "t-shirt",
-      "price": 2000,
-      "sku": "sdafsdkkalwed",
-      "gst": 18,
-      "description": "retail project",
-      "stock": {
-        "covai": "10",
-        "chennai": "50",
-        "bangalore": "50"
-      },
-      "ventorId": 916,
-      "reorderPoints": {
-        "covai": "5",
-        "chennai": "10",
-        "bangalore": "20"
-      },
-      "finalPrice": 2360,
-      "totalStockValue": 110,
-      "createdAt": "2024-10-18T10:57:11.857Z",
-      "updatedAt": "2024-10-18T10:57:11.857Z",
-      "__v": 0
-    },
-    {
-      "_id": "67123f564c45c334acc0cd2a",
-      "name": "car",
-      "image": "http://localhost:4000/images/product_1729249110932.jpg",
-      "category": "pen",
-      "price": 2000,
-      "sku": "adsdwqew",
-      "gst": 18,
-      "description": "retail project",
-      "stock": {
-        "kerala": "25",
-        "bangalore": "35"
-      },
-      "ventorId": 1194,
-      "reorderPoints": {
-        "kerala": "5",
-        "bangalore": "10"
-      },
-      "finalPrice": 2360,
-      "totalStockValue": 60,
-      "createdAt": "2024-10-18T10:58:30.994Z",
-      "updatedAt": "2024-10-18T10:58:30.994Z",
-      "__v": 0
-    }
-  ]
+this is the cart product order code rewrite it 
+app.post('/order', async (req, res) => {
+  try {
+      const {
+          items,
+          totalValue,
+          totalQuantity,
+          customerName,
+          customerPhoneNumber,
+          paymentType,
+          upiId,
+          cardNo,
+      } = req.body;
 
-analist this json value fetch and listout top 5 lowest product in 
+      // Basic validation
+      if (!items || !Array.isArray(items) || items.length === 0) {
+          return res.status(400).json({ success: false, message: 'Items are required and must be a non-empty array' });
+      }
+      if (totalValue === undefined || totalQuantity === undefined) {
+          return res.status(400).json({ success: false, message: 'Total value and total quantity are required' });
+      }
+      if (!customerName || !customerPhoneNumber) {
+          return res.status(400).json({ success: false, message: 'Customer name and phone number are required' });
+      }
+
+      const updatedItems = [];
+      const purchasePromises = [];
+
+      // Fetch and update the stock for each product in the cart
+      for (const item of items) {
+          const { productId, quantity } = item;
+
+          // Find the product by ID
+          const product = await Product.findById(productId);
+          if (!product) {
+              return res.status(404).json({ success: false, message: `Product with ID ${productId} not found` });
+          }
+
+          // Check if the requested quantity is available in stock
+          if (quantity > product.stock) {
+              return res.status(400).json({ success: false, message: `Insufficient stock for product with ID ${productId}. Available: ${product.stock}, Requested: ${quantity}` });
+          }
+
+          // Update product stock
+          product.stock -= quantity;
+          await product.save();
+
+          // Check stock level after update
+          if (product.stock < product.reorderPoint) {
+              purchasePromises.push(handleLowStock(product));
+          }
+
+          // Add product details to the updated items array, including reorderPoint
+          updatedItems.push({
+              productId: product._id,
+              productName: product.name,
+              productPrice: product.price,
+              quantity,
+              reorderPoint: product.reorderPoint // Ensure reorderPoint is included
+          });
+      }
+      
+      // Execute all purchase updates in parallel
+      await Promise.all(purchasePromises);
+
+      // Create and save new order
+      const order = new Order({
+          items: updatedItems,
+          totalValue,
+          totalQuantity,
+          customerName,
+          customerPhoneNumber,
+          paymentType,
+          upiId: paymentType === 'upiId' ? upiId : undefined,
+          cardNo: paymentType === 'cardNo' ? cardNo : undefined,
+      });
+
+      await order.save();
+
+      // Clear the cart after order creation
+      await Cart.deleteMany({});
+
+      res.json({ success: true, message: 'Order created successfully', order });
+  } catch (error) {
+      console.error('Error creating order:', error.message);
+      res.status(500).json({ success: false, message: 'Failed to create order' });
+  }
+});
+async function handleLowStock(product) {
+  const vendorId = product.ventorId; // Ensure this matches your Product schema
+  const foundVentor = await Ventor.findOne({ id: vendorId });
+
+  if (foundVentor) {
+      console.log(`Ventor Name: ${foundVentor.name}`);
+      const message = `${product.name} stock is low (current stock: ${product.stock}). Ventor Name: ${foundVentor.name}, Ventor ID: ${vendorId}`;
+
+      const purchase = new Purchase({
+          productId: product._id,
+          productname: product.name, // Ensure this matches the Purchase schema
+          vendorId, // Correct field name
+          VendorName: foundVentor.name, // Ensure this matches the Purchase schema
+          message: message,
+      });
+
+      await purchase.save();
+  } else {
+      console.log(`Ventor with ID ${vendorId} not found.`);
+  }
+}
+and the cart model json value is 
+[
+  {
+      "_id": "67125296ba37a1c0cb036b14",
+      "productId": "670fbad457974eaa8bd8d3b9",
+      "productName": "Pencil",
+      "productPrice": 118,
+      "category": "pen",
+      "gst": 18,
+      "quantity": 2,
+      "sku": "SKU1",
+      "reorderPoint": "10",
+      "warehouse": "covai",
+      "__v": 0
+  },
+  {
+      "_id": "67125aa8cb9a78884f039545",
+      "productId": "670fb8df57974eaa8bd8d3a2",
+      "productName": "Sample Product update",
+      "productPrice": 118,
+      "category": "electronics",
+      "gst": 18,
+      "quantity": 1,
+      "sku": "SKU12345wewq",
+      "reorderPoint": "10",
+      "warehouse": "covai",
+      "__v": 0
+  },
+  {
+      "_id": "67125aaccb9a78884f03954e",
+      "productId": "67123f074c45c334acc0cd27",
+      "productName": "note book",
+      "productPrice": 2360,
+      "category": "t-shirt",
+      "gst": 18,
+      "quantity": 1,
+      "sku": "sdafsdkkalwed",
+      "reorderPoint": "5",
+      "warehouse": "covai",
+      "__v": 0
+  },
+  {
+      "_id": "67125ab1cb9a78884f039553",
+      "productId": "670fb8df57974eaa8bd8d3a2",
+      "productName": "Sample Product update",
+      "productPrice": 118,
+      "category": "electronics",
+      "gst": 18,
+      "quantity": 1,
+      "sku": "SKU12345wewq",
+      "reorderPoint": "5",
+      "warehouse": "ooty",
+      "__v": 0
+  },
+  {
+      "_id": "67125ab3cb9a78884f039558",
+      "productId": "670fba7757974eaa8bd8d3b0",
+      "productName": "Sample Product1",
+      "productPrice": 16885.8,
+      "category": "electronicsww223",
+      "gst": 18,
+      "quantity": 1,
+      "sku": "SKU12345q",
+      "reorderPoint": "5",
+      "warehouse": "ooty",
+      "__v": 0
+  }
+]
+the order model is 
+
+const mongoose = require('mongoose');
+
+const OrderSchema = new mongoose.Schema({
+    items: [{
+        productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
+        productName: { type: String, required: true },
+        productPrice: { type: Number, required: true },
+        quantity: { type: Number, required: true },
+        reorderPoint: { type: Number, required: true },
+    }],
+    totalValue: { type: Number, required: true },
+    totalQuantity: { type: Number, required: true },
+    customerName: { type: String, required: true },
+    customerPhoneNumber: { type: String, required: true },
+    paymentType: { type: String, required: true },
+    upiId: { type: String, default: null }, 
+    cardNo: { type: String, default: null }, 
+    createdAt: { type: Date, default: Date.now }
+});
+
+const Order = mongoose.model('Order', OrderSchema);
+
+module.exports = Order;
+
+
+app.post('/order', async (req, res) => {
+rewrite the code correctly and correctly find the product 
+witch warehouse product the quantity - warehouse.product.stock correctly
+update and write model api test post man model json value
