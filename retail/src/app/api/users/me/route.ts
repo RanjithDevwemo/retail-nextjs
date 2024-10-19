@@ -31,14 +31,18 @@
 
 
 import { NextRequest, NextResponse } from "next/server";
-import { getDataFromToken } from "@/helpers/getDataFromToken";
-import UserVal from "@/models/UserModel";
-import { Connect } from "@/dbConfig/dbConfig";
+// import { getDataFromToken } from "@/helpers/getDataFromToken";
+
+import User from "@/models/userModel";
+import { getDataFromToken } from "../getDataFromToken/route";
+// import User from "@/models/UserModel";
+
+// import { Connect } from "@/dbConfig/dbConfig";
 
 export async function GET(request: NextRequest) {
     try {
         const userId = await getDataFromToken(request);
-        const user = await UserVal.findById(userId).select("-password");
+        const user = await User.findById(userId).select("-password");
 
         if (!user) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -50,3 +54,6 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: "An error occurred." }, { status: 400 });
     }
 }
+
+
+
