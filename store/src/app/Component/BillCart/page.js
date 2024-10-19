@@ -3,6 +3,7 @@ import React, { useState,useCallback } from 'react';
 import axios from 'axios';
 import { useAppContext } from '@/app/Context';
 import { MdDelete } from "react-icons/md";
+import Link from 'next/link';
 
 function Billcart() {
     const { cartItems,setCartItems } = useAppContext();
@@ -12,6 +13,8 @@ function Billcart() {
     const [paymentType, setPaymentType] = useState('cash_on_hand');
     const [upiId, setUpiId] = useState('');
     const [cardNo, setCardNo] = useState('');
+
+
 
      // Handle quantity change
      const handleQuantityChange = useCallback(async (itemId, newQuantity,warehouse) => {
@@ -138,106 +141,11 @@ function Billcart() {
                         <li>Total items: {cartItems.length}</li>
                     </ul>
                 </div>
+                <Link className="bg-black text-white p-2 rounded mt-4 w-full text-sm" href="/Component/BillConfirm" > order Confirm</Link>
 
                 {/* Customer Info and Payment */}
-                <div className="mt-4 bg-blue-500 p-4 rounded text-white">
-                    <div className="flex flex-col md:flex-row md:items-center mb-2">
-                        <label className="font-bold w-full md:w-1/3 text-sm" htmlFor="customerName">Customer Name:</label>
-                        <input
-                            type="text"
-                            placeholder='Enter Customer Name :'
-                            id="customerName"
-                            value={customerName}
-                            onChange={(e) => setCustomerName(e.target.value)}
-                            className="border rounded p-2 w-full md:w-2/3 text-sm text-black"
-                            required
-                        />
-                    </div>
-                    <div className="flex flex-col md:flex-row md:items-center mb-2">
-                        <label className="font-bold w-full md:w-1/3 text-sm" htmlFor="customerPhoneNumber">Customer Phone:</label>
-                        <input
-                            type="tel" // Changed to 'tel' for better mobile handling
-                            id="customerPhoneNumber"
-                            value={customerPhoneNumber}
-                            onChange={(e) => setCustomerPhoneNumber(e.target.value)}
-                            className="border rounded p-2 w-full md:w-2/3 text-sm text-black"
-                            required
-                        />
-                    </div>
-
-                    {/* Address Input */}
-                    <div className="flex flex-col md:flex-row md:items-center mb-4">
-                        <label className="w-full md:w-1/3 font-bold text-sm" htmlFor="address">Address:</label>
-                        <textarea
-                            id="address"
-                            placeholder='Enter your address...'
-                            rows={3}
-                            value={address}
-                            onChange={(e) => setAddress(e.target.value)}
-                            className='w-full md:w-2/3 p-2 border rounded text-sm text-black'
-                            required
-                        />
-                    </div>
-
-                    {/* Payment Method Buttons */}
-                    <div className="flex flex-col items-center justify-start md:flex-row md:items-center mb-4 ">
-                        <div className="gap-5 flex space-x-2 w-full md:w-2/3 items-center">
-                            <button
-                                type="button"
-                                className={`p-2 w-full rounded ${paymentType === 'cash_on_hand' ? 'bg-blue-600 text-white' : 'bg-slate-600'}`}
-                                onClick={() => setPaymentType('cash_on_hand')}
-                            >
-                                Cash on Hand
-                            </button>
-                            <button
-                                type="button"
-                                className={`p-2 w-full rounded ${paymentType === 'upiId' ? 'bg-blue-600 text-white' : 'bg-slate-600'}`}
-                                onClick={() => setPaymentType('upiId')}
-                            >
-                                UPI ID
-                            </button>
-                            <button
-                                type="button"
-                                className={`p-2 w-full rounded ${paymentType === 'cardNo' ? 'bg-blue-600 text-white' : 'bg-slate-600'}`}
-                                onClick={() => setPaymentType('cardNo')}
-                            >
-                                Card Number
-                            </button>
-                        </div>
-                    </div>
-
-                    {paymentType === 'upiId' && (
-                        <div className="flex flex-col md:flex-row md:items-center mb-2">
-                            <label className="font-bold w-full md:w-1/3 text-sm">UPI ID:</label>
-                            <input
-                                type="text"
-                                placeholder='Enter UPI ID'
-                                value={upiId}
-                                onChange={(e) => setUpiId(e.target.value)}
-                                className="border rounded p-2 w-full md:w-2/3 text-sm"
-                            />
-                        </div>
-                    )}
-                    {paymentType === 'cardNo' && (
-                        <div className="flex flex-col md:flex-row md:items-center mb-2">
-                            <label className="font-bold w-full md:w-1/3 text-sm">Card Number:</label>
-                            <input
-                                type="text"
-                                placeholder='Enter Card Number'
-                                value={cardNo}
-                                onChange={(e) => setCardNo(e.target.value)}
-                                className="border rounded p-2 w-full md:w-2/3 text-sm text-black"
-                            />
-                        </div>
-                    )}
-                    <button
-                        type="button"
-                        onClick={handleOrderPlacement}
-                        className="bg-black text-white p-2 rounded mt-4 w-full text-sm"
-                    >
-                        Place Order
-                    </button>
-                </div>
+                
+                
             </form>
         </div>
     );
