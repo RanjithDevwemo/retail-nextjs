@@ -2337,14 +2337,74 @@ app.get('/getsingleproduct/:id',async (req,res)=>{
     }
 })
 
+// app.put('/updateCartItem/:id', async (req, res) => {
+//     try {
+//         const cartItemId = req.params.id;
+//         const { quantity,warehouse } = req.body;
+//         console.log(warehouse);
+        
+// console.log(quantity);
+// console.log(cartItemId);
+
+//         // Validate request parameters and body
+//         if (!cartItemId || quantity === undefined) {
+//             return res.status(400).json({ success: false, message: 'Cart item ID and quantity are required' });
+//         }
+
+//         // Ensure quantity is a positive number
+//         if (quantity < 1) {
+//             return res.status(400).json({ success: false, message: 'Quantity must be at least 1' });
+//         }
+
+//         // Find the cart item
+//         const cartItem = await Cart.findById(cartItemId);
+//         if (!cartItem) {
+//             return res.status(404).json({ success: false, message: 'Cart item not found' });
+//         }
+
+//         // Find the product associated with the cart item
+//         const product = await Product.findById(cartItem.productId);
+//         if (!product) {
+//             return res.status(404).json({ success: false, message: 'Product not found' });
+//         }
+
+//         const stockValue=product.stock[warehouse];
+
+//         console.log("Stock available : ",stockValue);
+        
+
+
+//         // Check if the requested quantity is available in stock
+//         if (quantity > product.stock[warehouse]) {
+//             return res.status(400).json({ success: false, message: 'Not enough stock available' });
+//         }else{
+//             res.json({success:false,message:"cannot add stock not available"})
+//         }
+
+//         // Update the cart item quantity and save it
+//         cartItem.quantity = quantity;
+//         await cartItem.save();
+
+//         res.json({ success: true, message: 'Cart item updated successfully', cartItem, product });
+//     } catch (error) {
+//         console.error('Error updating cart item:', error.message);
+//         res.status(500).json({ success: false, message: 'Failed to update cart item' });
+//     }
+// });
+
+
 app.put('/updateCartItem/:id', async (req, res) => {
     try {
         const cartItemId = req.params.id;
-        const { quantity } = req.body;
+        const { quantity, warehouse } = req.body;
+
+        console.log(`Warehouse: ${warehouse}`);
+        console.log(`Quantity: ${quantity}`);
+        console.log(`Cart Item ID: ${cartItemId}`);
 
         // Validate request parameters and body
-        if (!cartItemId || quantity === undefined) {
-            return res.status(400).json({ success: false, message: 'Cart item ID and quantity are required' });
+        if (!cartItemId || quantity === undefined || !warehouse) {
+            return res.status(400).json({ success: false, message: 'Cart item ID, quantity, and warehouse are required' });
         }
 
         // Ensure quantity is a positive number
@@ -2364,8 +2424,16 @@ app.put('/updateCartItem/:id', async (req, res) => {
             return res.status(404).json({ success: false, message: 'Product not found' });
         }
 
+        // Get the stock value for the specified warehouse
+        const stockValue = product.stock[warehouse];
+
         // Check if the requested quantity is available in stock
-        if (quantity > product.stock) {
+        console.log("Stock available:", stockValue);
+        if (stockValue === undefined) {
+            return res.status(404).json({ success: false, message: `Warehouse "${warehouse}" not found` });
+        }
+
+        if (quantity > stockValue) {
             return res.status(400).json({ success: false, message: 'Not enough stock available' });
         }
 
@@ -2379,6 +2447,8 @@ app.put('/updateCartItem/:id', async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to update cart item' });
     }
 });
+
+
 
 app.delete('/single/product/:id',async (req,res)=>{
 

@@ -14,7 +14,7 @@ function Billcart() {
     const [cardNo, setCardNo] = useState('');
 
      // Handle quantity change
-     const handleQuantityChange = useCallback(async (itemId, newQuantity) => {
+     const handleQuantityChange = useCallback(async (itemId, newQuantity,warehouse) => {
         if (newQuantity < 1) return;
         try {
             // Optimistically update state
@@ -23,8 +23,7 @@ function Billcart() {
                     item._id === itemId ? { ...item, quantity: newQuantity } : item
                 )
             );
-
-            await axios.put(`http://localhost:4000/updateCartItem/${itemId}`, { quantity: newQuantity });
+            await axios.put(`http://localhost:4000/updateCartItem/${itemId}`, { quantity: newQuantity,warehouse });
         } catch (err) {
             console.error('Error updating quantity:', err.message);
             // Optionally revert the optimistic update in case of error
@@ -91,6 +90,8 @@ function Billcart() {
                                     <span className="flex gap-2">
                                         <p className="text-sm">${item.productPrice.toFixed(2)}</p>
                                         <p className="text-sm">IGST 18%</p>
+                                        <p className="text-sm">warehouse : {item.warehouse}</p>
+                                        
                                     </span>
                                 </div>
                                 <div className="flex items-center flex-col">
@@ -98,7 +99,7 @@ function Billcart() {
                                         <button
                                             type="button"
                                             className="bg-blue-500 text-white rounded px-1 sm:px-2"
-                                            onClick={() => handleQuantityChange(item._id, item.quantity + 1)}
+                                            onClick={() => handleQuantityChange(item._id, item.quantity + 1,item.warehouse)}
                                         >
                                             +
                                         </button>
@@ -106,7 +107,7 @@ function Billcart() {
                                         <button
                                             type="button"
                                             className="bg-gray-500 text-white rounded px-1 sm:px-2"
-                                            onClick={() => handleQuantityChange(item._id, item.quantity - 1)}
+                                            onClick={() => handleQuantityChange(item._id, item.quantity - 1,item.warehouse)}
                                         >
                                             -
                                         </button>
