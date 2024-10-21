@@ -1,164 +1,20 @@
 
-
-
-// // NavBar.tsx
-// 'use client';
-// import axios from "axios";
-// import Link from "next/link";
-// import { useState, useEffect } from "react";
-// import { useRouter } from "next/navigation";
-// import toast from "react-hot-toast";
-// import "@/app/HeaderFooter/nav.css";
-
-// export default function NavBar() {
-//     const [userName, setUserName] = useState(null);
-//     const router = useRouter();
-
-//     const fetchUserDetails = async () => {
-//         try {
-//             const res = await axios.get('/api/users/me');
-//             setUserName(res.data.data.username);
-//         } catch (error) {
-//             console.error(error.message);
-//             setUserName(null); 
-//         }
-//     };
-
-//     const logout = async () => {
-//         try {
-//             await axios.get('/api/users/logout');
-//             toast.success("Logout successful");
-//             setUserName(null);
-//             router.push('/login');
-//         } catch (error) {
-//             console.error(error.message);
-//             toast.error(error.message);
-//         }
-//     };
-
-//     useEffect(() => {
-//         fetchUserDetails();
-//     }, []);
-
-//     return (
-//         <div className="flex items-center justify-around gap-2">
-//             <div>
-//                 <ul className="flex items-center justify-between gap-2">
-//                           <li><Link href='/Pages/DashBoard'>DashBoard</Link></li>
-//            <li><Link href='/Pages/Purchase'>Purchase</Link></li>
-//            <li><Link href='/Pages/Sales'>Sales</Link></li>
-//            <li><Link href='/Component/AllWarehouse'>AllWarehouse</Link></li>
-//           <li><Link href='/Component/TodayTopFive'>Today Top Five</Link></li>
-//           <li><Link href='/Component/LowStockFive'>Top Five Low Stock Items</Link></li>
-
-//            </ul>
-//             </div>
-
-//             {userName ? (
-//                 <div className="flex items-center gap-4">
-//                     <span>{`${userName}`}</span>
-//                     <button onClick={logout} className="bg-blue-500 text-white p-2">Logout</button>
-//                 </div>
-//             ) : (
-//                 <Link href="/login" className="bg-blue-500 text-white p-2">Login</Link>
-//             )}
-//         </div>
-//     );
-// }
-
-
-
-
-
-// // NavBar.tsx
-// 'use client';
-// import axios from "axios";
-// import Link from "next/link";
-// import { useState, useEffect } from "react";
-// import { useRouter } from "next/navigation";
-// import toast from "react-hot-toast";
-
-// export default function NavBar() {
-//     const [userName, setUserName] = useState(null);
-//     const[data,setData]=useState('');
-//     const router = useRouter();
-
-//     const fetchUserDetails = async () => {
-//         try {
-//             const res = await axios.get('/api/users/me');
-//             setData(res.data.data.role);
-//             setUserName(res.data.data.username);
-//         } catch (error) {
-//             console.error(error.message);
-//             setUserName(null); // User not logged in
-//         }
-//     };
-//     console.log(data);
-    
-
-//     const logout = async () => {
-//         try {
-//             await axios.get('/api/users/logout');
-//             toast.success("Logout successful");
-//             setUserName(null);
-//             router.push('/login');
-//         } catch (error) {
-//             console.error(error.message);
-//             toast.error(error.message);
-//         }
-//     };
-
-//     useEffect(() => {
-//         fetchUserDetails();
-//     }, []);
-
-//     return (
-//         <div className="flex items-center justify-around gap-2">
-//             <div>
-//                 <ul className="flex items-center justify-between gap-2">
-//                     <li><Link href='/Components/AddProduct'>Add Product</Link></li>
-//                     <li><Link href='/Components/AllProducts'>All Products</Link></li>
-//                     <li><Link href='/Components/WareHouse'>Warehouse</Link></li>
-//                     <li><Link href='/Components/AddVendor'>Add Vendor</Link></li>
-//                     <li><Link href='/Pages/AllProducts'>Products</Link></li>
-//                     <li><Link href='/Dashboard/Filter'>Dashboard Home</Link></li>
-//                 </ul>
-//             </div>
-
-//             {userName ? (
-//                 <div className="flex items-center gap-4">
-//                     <span>{`${userName}`}</span>
-//                     <button onClick={logout} className="bg-blue-500 text-white p-2">Logout</button>
-//                 </div>
-//             ) : (
-//                 <Link href="/login" className="bg-blue-500 text-white p-2">Login</Link>
-//             )}
-//         </div>
-//     );
-// }
-
-
-
-
-
-
 'use client';
 import Link from "next/link";
-
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { useAppContext } from "@/app/Context";
 
 export default function NavBar() {
-    const { userName, updateUserDetails } =useAppContext();
+    const { userName, updateUserDetails } = useAppContext();
     const router = useRouter();
 
     const logout = async () => {
         try {
             await axios.get('/api/users/logout');
             toast.success("Logout successful");
-            updateUserDetails(); // Optional: to ensure the latest user details are fetched
+            updateUserDetails(); // Optional: to refresh user details
             router.push('/login');
         } catch (error) {
             console.error(error.message);
@@ -168,26 +24,25 @@ export default function NavBar() {
 
     return (
         <div className="flex items-center justify-around gap-2">
-        <div>
-            <ul className="flex items-center justify-between gap-2">
-                      <li><Link href='/Pages/DashBoard'>DashBoard</Link></li>
-       <li><Link href='/Pages/Purchase'>Purchase</Link></li>
-       <li><Link href='/Pages/Sales'>Sales</Link></li>
-       <li><Link href='/Component/AllWarehouse'>AllWarehouse</Link></li>
-      <li><Link href='/Component/TodayTopFive'>Today Top Five</Link></li>
-      <li><Link href='/Component/LowStockFive'>Top Five Low Stock Items</Link></li>
+            {userName ? (
+                <>
+                    <ul className="flex items-center justify-between gap-2">
+                        <li><Link href='/Pages/DashBoard'>Dashboard</Link></li>
+                        <li><Link href='/Pages/Purchase'>Purchase</Link></li>
+                        <li><Link href='/Pages/Sales'>Sales</Link></li>
+                        <li><Link href='/Component/AllWarehouse'>All Warehouse</Link></li>
+                        <li><Link href='/Component/TodayTopFive'>Today’s Top Five</Link></li>
+                        <li><Link href='/Component/LowStockFive'>Top Five Low Stock Items</Link></li>
+                    </ul>
 
-       </ul>
+                    <div className="flex items-center gap-4">
+                        <span>{userName}</span>
+                        <button onClick={logout} className="bg-blue-500 text-white p-2">Logout</button>
+                    </div>
+                </>
+            ) : (
+                <Link href="/login" className="bg-blue-500 text-white p-2">Login</Link>
+            )}
         </div>
-
-        {userName ? (
-            <div className="flex items-center gap-4">
-                <span>{`${userName}`}</span>
-                <button onClick={logout} className="bg-blue-500 text-white p-2">Logout</button>
-            </div>
-        ) : (
-            <Link href="/login" className="bg-blue-500 text-white p-2">Login</Link>
-        )}
-    </div>
     );
 }
