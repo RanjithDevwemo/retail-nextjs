@@ -221,9 +221,12 @@ function Products() {
     const numbers = [...Array(npage).keys()].map(num => num + 1);
 
     const handleDelete = async (id) => {
+        console.log(id);
+        
         try {
-            await axios.delete(`http://localhost:4000/api/allproduct/delete/${id}`);
-            setProducts(products.filter(product => product._id !== id)); // Update state to remove deleted product
+            await axios.delete(`http://localhost:4000/allproduct/delete/${id}`);
+            // setProducts(products.filter(product => product._id !== id));
+            window.location.reload();
         } catch (error) {
             console.error("Error deleting product:", error);
         }
