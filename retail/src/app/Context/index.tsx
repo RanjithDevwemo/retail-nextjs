@@ -24,6 +24,26 @@ export function AppWrapper({ children }) {
         inStock: 0,
         outOfStock: 0,
     });
+    const [userName, setUserName] = useState(null);
+
+    const fetchUserDetails = async () => {
+        try {
+            const res = await axios.get('/api/users/me');
+            setUserName(res.data.data.username);
+        } catch (error) {
+            console.error(error.message);
+            setUserName(null); // User not logged in
+        }
+    };
+
+    const updateUserDetails = () => {
+        fetchUserDetails();
+    };
+
+    useEffect(() => {
+        fetchUserDetails();
+    }, []);
+
 
     useEffect(()=>{
         const TodayTotalSales= async()=>{
@@ -179,7 +199,9 @@ setAllVentors(response.data);
             todayTotal,
             totalAmount,
             totalQuantity,
-            allVentors
+            allVentors,
+            userName, 
+            updateUserDetails
         }}>
             {children}
         </AppContext.Provider>

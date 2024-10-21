@@ -16,6 +16,27 @@ export function AppWrapper({ children }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [getAllOrders, setGetAllOrders] = useState('');
+    const [userName, setUserName] = useState(null);
+
+    const fetchUserDetails = async () => {
+        try {
+            const res = await axios.get('/api/users/me');
+            setUserName(res.data.data.username);
+        } catch (error) {
+            console.error(error.message);
+            setUserName(null); 
+        }
+    };
+
+    const updateUserDetails = () => {
+        fetchUserDetails();
+    };
+
+    useEffect(() => {
+        fetchUserDetails();
+    }, []);
+
+
 
     // Token verification
     useEffect(() => {
@@ -162,7 +183,9 @@ export function AppWrapper({ children }) {
             storeId,
             storeName,
             setFilteredProducts,
-            setCartItems
+            setCartItems,
+            userName, 
+            updateUserDetails
         }}>
             {children}
         </AppContext.Provider>

@@ -28,6 +28,9 @@ export default function LoginPage() {
             router.push('/Dashboard/Filter');
         } catch (error) {
             toast.error("Login failed");
+            // alert(error);
+            console.log(error);
+            
         } finally {
             setLoading(false);
         }

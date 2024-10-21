@@ -87,8 +87,8 @@ console.log("tenantId the tenant Id Is : ",tenantId);
             role
         });
 
-        const savedUser = await newUser.save();
-        await sendEmail({ email, emailType: "VERIFY", userId: savedUser._id });
+         await newUser.save();
+        // await sendEmail({ email, emailType: "VERIFY", userId: savedUser._id });
 
         return NextResponse.json(
             { message: "User created successfully" },
