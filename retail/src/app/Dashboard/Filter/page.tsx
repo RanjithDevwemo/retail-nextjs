@@ -14,6 +14,8 @@ import Graph from '../Graph/page';
 import Products from '@/app/Components/AllProducts/page';
 import Sales from '@/app/Components/Sales/page';
 import CustomersDetail from '@/app/Components/CutomerDetails/page';
+import Omnichannel from '@/app/Components/Omnichannels/page';
+import { IoMdCloudCircle } from "react-icons/io";
 
 export default function Filter() {
     const [click, setClick] = useState('Home');
@@ -25,6 +27,7 @@ export default function Filter() {
         { name: 'Products', icon: <FaBoxOpen /> },
         { name: 'Sales', icon: <BsBarChartFill /> },
         { name: 'Help Center', icon: <HiDesktopComputer />, path: '/pages/HelpCenter' },
+        {name:"Omnichannel",icon:<IoMdCloudCircle/>}
     ];
 
     return (
@@ -81,6 +84,15 @@ export default function Filter() {
                         </div>
                     </div>
                 )}
+                {
+                    click==="Omnichannel"&&(
+                        <div className="flex flex-col w-full">
+                            <div className="mb-4">
+                                <Omnichannel/>
+                            </div>
+                        </div>
+                    )
+                }
             
             </div>
         </div>

@@ -60,7 +60,10 @@ export async function POST(request: NextRequest) {
     // await connect(tenantId);
     try {
         const reqBody = await request.json();
-        const { email, password,tenantId } = reqBody;
+        const { email, password,tenantId,role } = reqBody;
+
+        console.log("role value is getting succesfully: ",role);
+        
 
         if(!tenantId){
             return NextRequest.json({error:"Tenant Id is Not exsite"})
@@ -75,6 +78,12 @@ export async function POST(request: NextRequest) {
         if (!validPassword) {
             return NextResponse.json({ error: "Invalid password" }, { status: 400 });
         }
+        
+    const userRole=await User.findOne({role});
+
+    if(!userRole){
+return NextResponse.json({error:"invalid userRole"},{status:400});
+    }
 
         const tokendata = {
             id: user._id,
