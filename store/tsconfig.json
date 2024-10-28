@@ -21,6 +21,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/dbConfig/dbConfig.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/dbConfig/dbConfig.ts", ".next/types/app/Manufacturing/BOM/page.tsx", ".next/types/app/Manufacturing/Scrap/page.tsx", ".next/types/app/Manufacturing/ProductManagement/BOM/page.tsx", ".next/types/app/page.tsx", ".next/types/app/layout.tsx"],
   "exclude": ["node_modules"]
 }
