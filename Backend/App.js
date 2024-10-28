@@ -20,6 +20,7 @@ const ManufacturingCart=require('./models/ManuFacturingAddtoCart');
 const ManufacturingProducts=require('./models/ManufacturingAddProduct');
 // Create Express app
 // const Store=require('./models/StoreModel');
+const ManufacturingOrder=require('./models/ManuFacturingOrder')
 const app = express();
 const port = process.env.PORT || 4000;
 const JWT_SECRET = process.env.JWT_SECRET || 'retail_jwt_secret';
@@ -1404,18 +1405,17 @@ app.post('/api/order', async (req, res) => {
         }
 
         // Create the order object
-        const order = {
+        const order = new ManufacturingOrder({
             username,
             phoneNumber,
             cartItems: orderItems,
             orderDate: new Date(),
-        };
+        });
 
-        // Here you would typically save the order to a database (create an Order model)
-        // For demonstration, we just log it
-        console.log('Order placed:', order);
+        // Save the order to the database
+        await order.save();
 
-        // Optionally, you can remove items from the cart after placing the order
+        // Optionally, remove items from the cart after placing the order
         await ManufacturingCart.deleteMany({ productId: { $in: cartItems.map(item => item.productId) } });
 
         return res.status(200).json({ success: true, message: 'Order placed successfully!', order });
