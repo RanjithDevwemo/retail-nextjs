@@ -1298,6 +1298,19 @@ app.get('/api/manufacturingAdd',async (req,res)=>{
     }
 })
 
+app.delete('/api/manufacturingDelete/:id',async(req,res)=>{
+    try{
+const {id}=req.params;
+const deleteOne=await ManufacturingProducts.findByIdAndDelete(id);
+if(!deleteOne){
+    return res.json({success:false,message:"Product Not Found"});
+}
+res.json({success:true,message:"product deleted successfully"});
+    }catch(error){
+res.status(500).json({success:false,message:"server error : ",error});
+    }
+})
+
 app.post("/api/cart", async (req, res) => {
     try {
         const items = req.body; 
@@ -1608,22 +1621,6 @@ app.put('/api/worker/:id', async (req, res) => {
     }
 });
 
-
-// //B2B add values
-// app.post('/api/b2badd',async (req,res)=>{
-//     try{
-//         const{companyName,dealstatus,dealOwner}=req.body;
-//         if(!companyName||!dealstatus||!dealOwner){
-//             return res.json({success:false,message:"missing required value ."});
-//         }
-//         const b2b=new B2B({companyName,dealstatus,dealOwner});
-//         //save in database
-//         await b2b.save();
-//         res.json({success:true,message:"b2b values added successfully"});
-//     }catch(error){
-// res.json({success:false,message:"server error : ",error})
-//     }
-// })
 
 
 
