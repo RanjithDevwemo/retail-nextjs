@@ -1,6 +1,30 @@
-// const mongoose=require('mongoose');
+// // const mongoose=require('mongoose');
 
-// const WorkerSchema=mongoose.Schema({
+// // const WorkerSchema=mongoose.Schema({
+// //     name: {
+// //         type: String,
+// //         required: true,
+// //     },
+// //     targetQuantity: {
+// //         type: Number,
+// //         required: true,
+// //     },
+// //     complitedQuantity: {
+// //         type: Number,
+// //         required: true,
+// //     },
+// //     orderDate: { type: Date, default: Date.now }
+// // })
+
+// // const Worker=mongoose.model('worker',WorkerSchema);
+
+// // module.exports=Worker;
+
+
+
+// const mongoose = require('mongoose');
+
+// const WorkerSchema = new mongoose.Schema({
 //     name: {
 //         type: String,
 //         required: true,
@@ -9,23 +33,31 @@
 //         type: Number,
 //         required: true,
 //     },
-//     complitedQuantity: {
+//     completedQuantity: {
 //         type: Number,
 //         required: true,
 //     },
-//     orderDate: { type: Date, default: Date.now }
-// })
+//     orderDate: { 
+//         type: Date, 
+//         default: Date.now 
+//     }
+// });
 
-// const Worker=mongoose.model('worker',WorkerSchema);
+// const Worker = mongoose.model('Worker', WorkerSchema);
 
-// module.exports=Worker;
+// module.exports = Worker;
+
 
 
 
 const mongoose = require('mongoose');
 
 const WorkerSchema = new mongoose.Schema({
-    name: {
+    processNumber: {
+        type: String,
+        required: true,
+    },
+    jobWorkNumber: {
         type: String,
         required: true,
     },

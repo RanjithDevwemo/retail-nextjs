@@ -19,6 +19,7 @@ const WareHouse=require("./models/GoodsTransfer");
 const ManufacturingCart=require('./models/ManuFacturingAddtoCart');
 const ManufacturingProducts=require('./models/ManufacturingAddProduct');
 const Worker=require('./models/Worker');
+const B2B=require('./models/B2B');
 // Create Express app
 // const Store=require('./models/StoreModel');
 const ManufacturingOrder=require('./models/ManuFacturingOrder')
@@ -1543,20 +1544,21 @@ app.get('/getname/:id', async (req, res) => {
     }
 });
 
-//Product Management
 
+// Create a new worker
 app.post('/api/worker', async (req, res) => {
     try {
-        const { name, targetQuantity, completedQuantity } = req.body;
+        const { processNumber, jobWorkNumber, targetQuantity, completedQuantity } = req.body;
 
         // Validate input
-        if (!name || !targetQuantity || !completedQuantity) {
+        if (!processNumber || !jobWorkNumber || !targetQuantity || !completedQuantity) {
             return res.json({ success: false, message: "Missing required fields." });
         }
 
         // Create a new worker instance
         const worker = new Worker({
-            name,
+            processNumber,
+            jobWorkNumber,
             targetQuantity,
             completedQuantity
         });
@@ -1570,28 +1572,29 @@ app.post('/api/worker', async (req, res) => {
     }
 });
 
-app.get('/api/worker',async (req,res)=>{
-    try{
-        const worker=await Worker.find({});
-        res.json({success:true,message:"geting success ",data:worker})
-    }catch(error){
-        res.json({success:false,message:"Server Error : ",error});
+// Get all workers
+app.get('/api/worker', async (req, res) => {
+    try {
+        const workers = await Worker.find({});
+        res.json({ success: true, message: "Fetching success", data: workers });
+    } catch (error) {
+        res.json({ success: false, message: "Server error", error });
     }
-})
+});
 
 // Update an existing worker
 app.put('/api/worker/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, targetQuantity, completedQuantity } = req.body;
+        const { processNumber, jobWorkNumber, targetQuantity, completedQuantity } = req.body;
 
-        if (!name || !targetQuantity || !completedQuantity) {
+        if (!processNumber || !jobWorkNumber || !targetQuantity || !completedQuantity) {
             return res.json({ success: false, message: "Missing required fields." });
         }
 
         const updatedWorker = await Worker.findByIdAndUpdate(
             id,
-            { name, targetQuantity, completedQuantity },
+            { processNumber, jobWorkNumber, targetQuantity, completedQuantity },
             { new: true }
         );
 
@@ -1604,6 +1607,65 @@ app.put('/api/worker/:id', async (req, res) => {
         res.json({ success: false, message: "Server error", error });
     }
 });
+
+
+// //B2B add values
+// app.post('/api/b2badd',async (req,res)=>{
+//     try{
+//         const{companyName,dealstatus,dealOwner}=req.body;
+//         if(!companyName||!dealstatus||!dealOwner){
+//             return res.json({success:false,message:"missing required value ."});
+//         }
+//         const b2b=new B2B({companyName,dealstatus,dealOwner});
+//         //save in database
+//         await b2b.save();
+//         res.json({success:true,message:"b2b values added successfully"});
+//     }catch(error){
+// res.json({success:false,message:"server error : ",error})
+//     }
+// })
+
+
+
+// B2B Add Values API Endpoint
+app.post('/api/b2badd', async (req, res) => {
+    try {
+        const { companyName, dealOwner } = req.body;
+
+        // Validate required fields
+        if (!companyName || !dealOwner) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Missing required fields." 
+            });
+        }
+
+        // Create a new B2B instance with a default dealStatus
+        const b2b = new B2B({
+            companyName,
+            dealOwner,
+            dealStatus: 'Pending' // Default status
+        });
+
+        // Save to database
+        await b2b.save();
+
+        // Respond with success
+        return res.status(201).json({ 
+            success: true, 
+            message: "B2B values added successfully." 
+        });
+    } catch (error) {
+        console.error("Server error:", error); // Log error for debugging
+        return res.status(500).json({ 
+            success: false, 
+            message: "Server error occurred.", 
+            error: error.message 
+        });
+    }
+});
+
+
 // Start the server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

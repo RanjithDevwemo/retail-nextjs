@@ -1,3 +1,5 @@
+
+
 'use client';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -6,7 +8,8 @@ const WorkerManagement = () => {
     // State for the form
     const [formData, setFormData] = useState({
         id: '',
-        name: '',
+        processNumber: '',
+        jobWorkNumber: '',
         targetQuantity: '',
         completedQuantity: ''
     });
@@ -35,7 +38,7 @@ const WorkerManagement = () => {
         setSuccessMessage('');
 
         // Validate inputs
-        if (!formData.name || !formData.targetQuantity || !formData.completedQuantity) {
+        if (!formData.processNumber || !formData.jobWorkNumber || !formData.targetQuantity || !formData.completedQuantity) {
             setError('All fields are required.');
             return;
         }
@@ -49,7 +52,8 @@ const WorkerManagement = () => {
                 setSuccessMessage(`Worker ${formData.id ? 'updated' : 'added'} successfully!`);
                 setFormData({
                     id: '',
-                    name: '',
+                    processNumber: '',
+                    jobWorkNumber: '',
                     targetQuantity: '',
                     completedQuantity: ''
                 });
@@ -84,21 +88,25 @@ const WorkerManagement = () => {
         fetchWorkers();
     }, []);
 
-    // Search handler
-    const handleSearch = (e) => {
-        setSearchTerm(e.target.value);
-    };
+  // Search handler
+const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+};
 
-    // Filtered workers based on the search term
-    const filteredWorkers = workers.filter(worker => 
-        worker.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+// Filtered workers based on the search term
+const filteredWorkers = workers.filter(worker => 
+    (worker.processNumber && worker.processNumber.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (worker.jobWorkNumber && worker.jobWorkNumber.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (worker.name && worker.name.toLowerCase().includes(searchTerm.toLowerCase()))
+);
+
 
     // Edit worker
     const handleEdit = (worker) => {
         setFormData({
             id: worker._id,
-            name: worker.name,
+            processNumber: worker.processNumber,
+            jobWorkNumber: worker.jobWorkNumber,
             targetQuantity: worker.targetQuantity,
             completedQuantity: worker.completedQuantity
         });
@@ -106,15 +114,27 @@ const WorkerManagement = () => {
 
     return (
         <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
-            <h1 className="text-2xl font-bold mb-4">Add/Edit Worker</h1>
+            <h1 className="text-2xl font-bold mb-4">Add/Edit SubContracting</h1>
             <form onSubmit={handleSubmit} className='flex flex-col'>
                 <div className="mb-4">
-                    <label className="block mb-2" htmlFor="name">Name</label>
+                    <label className="block mb-2" htmlFor="processNumber">Process Number</label>
                     <input
                         type="text"
-                        id="name"
-                        name="name"
-                        value={formData.name}
+                        id="processNumber"
+                        name="processNumber"
+                        value={formData.processNumber}
+                        onChange={handleChange}
+                        required
+                        className="w-full border border-gray-300 p-2 rounded"
+                    />
+                </div>
+                <div className="mb-4">
+                    <label className="block mb-2" htmlFor="jobWorkNumber">Job Work Number</label>
+                    <input
+                        type="text"
+                        id="jobWorkNumber"
+                        name="jobWorkNumber"
+                        value={formData.jobWorkNumber}
                         onChange={handleChange}
                         required
                         className="w-full border border-gray-300 p-2 rounded"
@@ -154,7 +174,7 @@ const WorkerManagement = () => {
             <h1 className="text-2xl font-bold mb-4 mt-8">Workers List</h1>
             <input 
                 type="text" 
-                placeholder="Search by name" 
+                placeholder="Search by Process Number, Job Work Number, or Name" 
                 value={searchTerm}
                 onChange={handleSearch}
                 className="mb-4 w-full border border-gray-300 p-2 rounded"
@@ -167,25 +187,24 @@ const WorkerManagement = () => {
                 <table className="min-w-full bg-white border border-gray-300">
                     <thead>
                         <tr className="bg-gray-200">
-
                             <th className="border border-gray-300 p-2">S.No</th>
-                            <th className="border border-gray-300 p-2">Job Worker Id</th>
-                            <th className="border border-gray-300 p-2">Name</th>
+                            <th className="border border-gray-300 p-2">Process Number</th>
+                            <th className="border border-gray-300 p-2">Job Work Number</th>
+                           
                             <th className="border border-gray-300 p-2">Target Quantity</th>
                             <th className="border border-gray-300 p-2">Completed Quantity</th>
-                            {/* <th className="border border-gray-300 p-2">Order Date</th> */}
                             <th className="border border-gray-300 p-2">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredWorkers.map((worker,index) => (
+                        {filteredWorkers.map((worker, index) => (
                             <tr key={worker._id} className="hover:bg-gray-100">
-                                <td className="border border-gray-300 p-2">{index+1}</td>
-                                <td className="border border-gray-300 p-2">{worker._id}</td>
-                                <td className="border border-gray-300 p-2">{worker.name}</td>
+                                <td className="border border-gray-300 p-2">{index + 1}</td>
+                                <td className="border border-gray-300 p-2">{worker.processNumber}</td>
+                                <td className="border border-gray-300 p-2">{worker.jobWorkNumber}</td>
+                            
                                 <td className="border border-gray-300 p-2">{worker.targetQuantity}</td>
                                 <td className="border border-gray-300 p-2">{worker.completedQuantity}</td>
-                                {/* <td className="border border-gray-300 p-2">{new Date(worker.orderDate).toLocaleString()}</td> */}
                                 <td className="border border-gray-300 p-2">
                                     <button 
                                         onClick={() => handleEdit(worker)}
