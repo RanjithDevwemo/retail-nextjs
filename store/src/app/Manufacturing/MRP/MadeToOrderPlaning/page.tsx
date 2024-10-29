@@ -1,8 +1,9 @@
+
 'use client';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const ProductsList = () => {
+const ProductList = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -36,16 +37,17 @@ const ProductsList = () => {
 
     return (
         <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
-            <h1 className="text-2xl font-bold mb-4">Products List</h1>
+            <h1 className="text-2xl font-bold mb-4">Made To Order Planing</h1>
             <table className="min-w-full bg-white border border-gray-300">
                 <thead>
                     <tr className="bg-gray-200">
                         <th className="border border-gray-300 p-2">Item Name</th>
-                        <th className="border border-gray-300 p-2">Item Category</th>
-                        <th className="border border-gray-300 p-2">Stock</th>
-                        <th className="border border-gray-300 p-2">Reducing Stock</th>
-                        <th className="border border-gray-300 p-2">Amount</th>
-                        <th className="border border-gray-300 p-2">Date</th>
+                        <th className="border border-gray-300 p-2">Category</th>
+                        <th className="border border-gray-300 p-2">In Stock</th>
+                        <th className="border border-gray-300 p-2">Total Orders</th>
+                        <th className="border border-gray-300 p-2">Require Quantity</th>
+                        <th className="border border-gray-300 p-2">To Be Orders</th>
+                  
                     </tr>
                 </thead>
                 <tbody>
@@ -54,14 +56,9 @@ const ProductsList = () => {
                             <td className="border border-gray-300 p-2">{product.ItemName}</td>
                             <td className="border border-gray-300 p-2">{product.ItemCategory}</td>
                             <td className="border border-gray-300 p-2">{product.stock}</td>
-                            <td className="border border-gray-300 p-2">
-    {product.oldstock > product.stock 
-        ? `-${product.oldstock - product.stock}` 
-        : `+${product.oldstock - product.stock}`}
-</td>
-
-                            <td className="border border-gray-300 p-2">{product.amount}</td>
-                            <td className="border border-gray-300 p-2">{new Date(product.date).toLocaleString()}</td>
+                            <td className="border border-gray-300 p-2">{product.oldstock}</td>
+                            <td className="border border-gray-300 p-2">0</td>
+                            <td className="border border-gray-300 p-2">{product.tobeOrdered}</td>
                         </tr>
                     ))}
                 </tbody>
@@ -70,4 +67,4 @@ const ProductsList = () => {
     );
 };
 
-export default ProductsList;
+export default ProductList;

@@ -18,6 +18,7 @@ const Purchase=require("./models/PurchaseOrder");
 const WareHouse=require("./models/GoodsTransfer");
 const ManufacturingCart=require('./models/ManuFacturingAddtoCart');
 const ManufacturingProducts=require('./models/ManufacturingAddProduct');
+const Worker=require('./models/Worker');
 // Create Express app
 // const Store=require('./models/StoreModel');
 const ManufacturingOrder=require('./models/ManuFacturingOrder')
@@ -1181,23 +1182,6 @@ app.get('/storename/:id',async (req,res)=>{
 
 
 //Bill Of Matrial
-// app.post('/api/bom',async(req,res)=>{
-//     try{
-//         const {name,quantity,unit}=req.body;
-
-//         if(!name||!quantity||!unit){
-//             return res.json({success:false,message:"name,quantity,unit are required"});
-//         }
-//         const bom=new BOM({name,quantity,unit});
-
-//         bom.save();
-//         res.json({success:true,message:`success : ${bom}`})
-//     }catch(error){
-//         console.error('Error signing up store:', error);
-// res.json({success:false,message:"server error : ",error});
-//     }
-// })
-
 
 app.post('/api/bom', async (req, res) => {
     try {
@@ -1241,6 +1225,7 @@ app.post('/api/bom', async (req, res) => {
     }
 });
 
+
 app.get("/api/bom",async (req,res)=>{
     try{
 const getBOM=await BOM.find({});
@@ -1249,6 +1234,41 @@ res.json({success:true,message:"fetching successfulle",data:getBOM});
         res.json({success:false,message:"sever error : ",error});
     }
 })
+
+
+// PATCH endpoint to update BOM status
+app.patch("/api/bom/:id", async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    try {
+        const updatedBOM = await BOM.findByIdAndUpdate(
+            id,
+            { status },
+            { new: true, runValidators: true } 
+        );
+
+        if (!updatedBOM) {
+            return res.status(404).json({
+                success: false,
+                message: "BOM item not found."
+            });
+        }
+
+        res.json({
+            success: true,
+            message: "BOM status updated successfully.",
+            data: updatedBOM
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: "Error updating BOM status.",
+            error
+        });
+    }
+});
+
 
 app.post("/api/manufacturingAdd",async(req,res)=>{
     try{
@@ -1276,27 +1296,6 @@ app.get('/api/manufacturingAdd',async (req,res)=>{
         res.json({success:false,message:"server error : ",error});
     }
 })
-
-
-
-// app.post("/api/cart", async (req, res) => {
-//     try {
-//         const { productId, ItemName, stock, amount } = req.body;
-        
-//         if (!productId || !ItemName || stock === undefined || !amount) {
-//             return res.json({ success: false, message: "Product ID, name, stock, and amount are required" });
-//         }
-
-//         const newCartItem = new ManufacturingCart({ productId, ItemName, stock, amount });
-
-//         // Save the cart item in the database
-//         await newCartItem.save();
-
-//         res.json({ success: true, message: "Item added to cart successfully", data: newCartItem });
-//     } catch (error) {
-//         res.json({ success: false, message: "Server error", error });
-//     }
-// });
 
 app.post("/api/cart", async (req, res) => {
     try {
@@ -1369,6 +1368,62 @@ app.put("/api/cart/decrease", async (req, res) => {
 
 
 // POST /order endpoint
+// app.post('/api/order', async (req, res) => {
+//     const { username, phoneNumber, cartItems } = req.body;
+
+//     // Basic validation
+//     if (!username || !phoneNumber || !Array.isArray(cartItems) || cartItems.length === 0) {
+//         return res.status(400).json({ success: false, message: 'Invalid input data.' });
+//     }
+
+//     try {
+//         const orderItems = [];
+
+//         for (const item of cartItems) {
+//             const product = await ManufacturingProducts.findById(item.productId);
+//             if (!product) {
+//                 return res.status(400).json({ success: false, message: `Product not found for productId ${item.productId}.` });
+//             }
+
+//             // Check if there's enough stock
+//             if (product.stock < item.quantity) {
+//                 return res.status(400).json({ success: false, message: `Not enough stock for ${product.ItemName}.` });
+//             }
+//             product.oldstock+=product.stock;
+//             // Reduce stock
+//             product.stock -= item.quantity;
+//             await product.save();
+
+//             // Add to order items
+//             orderItems.push({
+//                 productId: product._id,
+//                 ItemName: product.ItemName,
+//                 quantity: item.quantity,
+//                 amount: product.amount,
+//             });
+//         }
+
+//         // Create the order object
+//         const order = new ManufacturingOrder({
+//             username,
+//             phoneNumber,
+//             cartItems: orderItems,
+//             orderDate: new Date(),
+//         });
+
+//         // Save the order to the database
+//         await order.save();
+
+//         // Optionally, remove items from the cart after placing the order
+//         await ManufacturingCart.deleteMany({ productId: { $in: cartItems.map(item => item.productId) } });
+
+//         return res.status(200).json({ success: true, message: 'Order placed successfully!', order });
+//     } catch (error) {
+//         console.error('Error processing order:', error);
+//         return res.status(500).json({ success: false, message: 'Internal server error.' });
+//     }
+// });
+
 app.post('/api/order', async (req, res) => {
     const { username, phoneNumber, cartItems } = req.body;
 
@@ -1390,6 +1445,9 @@ app.post('/api/order', async (req, res) => {
             if (product.stock < item.quantity) {
                 return res.status(400).json({ success: false, message: `Not enough stock for ${product.ItemName}.` });
             }
+
+            // Update old stock to the current stock before deducting
+            product.oldstock = product.stock;
 
             // Reduce stock
             product.stock -= item.quantity;
@@ -1427,6 +1485,38 @@ app.post('/api/order', async (req, res) => {
 
 
 
+app.get('/api/order',async (req,res)=>{
+    try{
+        const getOrders=await ManufacturingOrder.find({});
+        res.json({success:true,message:getOrders})
+    }catch(error){
+        res.json({success:false,message:"server Error : ",error});
+        console.log("server error ");   
+    }
+})
+
+app.patch('/api/order/:id', async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    try {
+        const updatedOrder = await ManufacturingOrder.findByIdAndUpdate(
+            id,
+            { status },
+            { new: true }
+        );
+
+        if (!updatedOrder) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
+        }
+
+        res.json({ success: true, message: 'Order status updated successfully', order: updatedOrder });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server error', error });
+        console.log("Server error: ", error);
+    }
+});
+
 
 app.get('/api/cart',async (req,res)=>{
     try{
@@ -1453,6 +1543,67 @@ app.get('/getname/:id', async (req, res) => {
     }
 });
 
+//Product Management
+
+app.post('/api/worker', async (req, res) => {
+    try {
+        const { name, targetQuantity, completedQuantity } = req.body;
+
+        // Validate input
+        if (!name || !targetQuantity || !completedQuantity) {
+            return res.json({ success: false, message: "Missing required fields." });
+        }
+
+        // Create a new worker instance
+        const worker = new Worker({
+            name,
+            targetQuantity,
+            completedQuantity
+        });
+
+        // Save the worker to the database
+        await worker.save();
+
+        res.json({ success: true, message: worker });
+    } catch (error) {
+        res.json({ success: false, message: "Server error", error });
+    }
+});
+
+app.get('/api/worker',async (req,res)=>{
+    try{
+        const worker=await Worker.find({});
+        res.json({success:true,message:"geting success ",data:worker})
+    }catch(error){
+        res.json({success:false,message:"Server Error : ",error});
+    }
+})
+
+// Update an existing worker
+app.put('/api/worker/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, targetQuantity, completedQuantity } = req.body;
+
+        if (!name || !targetQuantity || !completedQuantity) {
+            return res.json({ success: false, message: "Missing required fields." });
+        }
+
+        const updatedWorker = await Worker.findByIdAndUpdate(
+            id,
+            { name, targetQuantity, completedQuantity },
+            { new: true }
+        );
+
+        if (!updatedWorker) {
+            return res.json({ success: false, message: "Worker not found." });
+        }
+
+        res.json({ success: true, message: updatedWorker });
+    } catch (error) {
+        res.json({ success: false, message: "Server error", error });
+    }
+});
 // Start the server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
